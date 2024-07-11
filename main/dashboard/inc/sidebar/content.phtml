@@ -6,8 +6,11 @@
             </li>
             <li>
                 <div class="flex items-center gap-3">
-                    <div class="relative inline-flex items-center justify-center border-2 w-10 h-10 overflow-hidden bg-gray-100 dark:bg-black dark:border-gray-600 rounded-full">
-                        <span class="font-medium text-gray-600 dark:text-white"><?= $auth -> misyShortCutFullName() ?: ''; ?></span>
+                    <div class="relative inline-flex items-center justify-center border-2 w-10 h-10 overflow-hidden bg-gray-100 dark:bg-black dark:border-neutral-700 rounded-full">
+                    <?= $auth -> misyAvatar() 
+                        ? '<img src="'.$auth -> misyAvatar().'" loading="lazy" decoding="async" alt="">' 
+                        : '<span class="font-medium text-gray-600 dark:text-white">'.$auth -> misyShortCutFullName().'</span>'; 
+                    ?>
                     </div>
                     <div class="font-semibold">
                         <div class="text-sm dark:text-white"><?= $auth -> misyFullName() ?: ''; ?></div>
