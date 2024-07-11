@@ -177,12 +177,19 @@ function loadMorePost(params) {
     setProgressToast(0);
 
     var params = DOMPurify.sanitize(window.location.pathname.split('/').pop());
+    var loadMoreBtn = $('#loadMorePostContent');
     
     $.post("xhr/post/load_more_post", { params: params, key: morePostStartKey })
         .done(function(data) {
             if (data['status'] === 'success' && data['statusCode'] === 200) { 
-                if (data['posts']) { $.each(data.posts, function (key, value) { serializePost(value); }); morePostStartKey += data.posts.length; setProgressToast(1); } else { setProgressToast(2); }
-            } else { $('#loadMorePostContent').remove(); setProgressToast(4); }
+                if (data['posts']) { $.each(data.posts, function (key, value) { serializePost(value); }); 
+                    morePostStartKey += data.posts.length; 
+                    
+                    if (data.posts.length < 6) {loadMoreBtn.remove(); }
+
+                    setProgressToast(1); 
+                } else { setProgressToast(2); }
+            } else { loadMoreBtn.remove(); setProgressToast(4); }
         }) .fail(function(data) { setProgressToast(2); }
     );
 }
