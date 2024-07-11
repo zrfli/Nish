@@ -17,8 +17,11 @@
                     </button>
                 </div>
                 <div>
-                    <div class="cursor-pointer relative inline-flex items-center justify-center w-10 h-10 border-2 overflow-hidden bg-gray-100 rounded-full dark:bg-black dark:border-gray-600" aria-expanded="false" data-dropdown-toggle="dropdown-user">
-                        <span class="font-medium text-gray-600 dark:text-white"><?= $auth -> misyShortCutFullName() ?: ''; ?></span>
+                    <div class="cursor-pointer relative inline-flex items-center justify-center w-10 h-10 border-2 overflow-hidden bg-gray-100 rounded-full dark:bg-black dark:border-neutral-700" aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                        <?= $auth -> misyAvatar() 
+                            ? '<img src="'.$auth -> misyAvatar().'" loading="lazy" decoding="async" alt="">' 
+                            : '<span class="font-medium text-gray-600 dark:text-white">'.$auth -> misyShortCutFullName().'</span>'; 
+                        ?>
                     </div>
                     <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow" id="dropdown-user">
                         <div class="px-4 py-3" role="none">
