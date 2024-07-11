@@ -1,4 +1,4 @@
-<?php if($_SERVER['REQUEST_URI'] != '/dashboard/settings'){ header('Location: /not-found'); exit(); } require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/db.php'; if(!$auth -> isLoggedIn()){ header('Location: /login'); exit(); } include '../inc/head/content.phtml'; include '../inc/header/content.phtml'; include '../inc/sidebar/content.phtml'; ?> 
+<?php if($_SERVER['REQUEST_URI'] != '/dashboard/settings') { header('Location: /not-found'); exit(); } require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/db.php'; if (!$auth -> isLoggedIn()) { header('Location: /login'); exit(); } require_once '../inc/head/content.phtml'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/includeAsset.php'; require_once '../inc/header/content.phtml'; require_once '../inc/sidebar/content.phtml'; ?>
 <div class="sm:ml-64 mt-28">
     <div class="mb-4 col-span-full ml-4 xl:mb-2">
         <h1 class="font-semibold text-gray-900 text-xl dark:text-white">Ayarlar</h1>
@@ -90,4 +90,4 @@
         </div>
     </div>
 </div>
-<?php include_once '../inc/js/content.phtml'; ?>
+<?php require_once '../inc/js/content.phtml'; ?>

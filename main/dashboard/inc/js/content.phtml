@@ -24,7 +24,7 @@ function setProgressToast(params) {
     if(status === 0) {
         $('body').append(`<div id="progress-toast" tabindex="-1" class="fixed left-0 right-0 top-0 z-50 flex h-full w-full items-end justify-center overflow-y-auto overflow-x-hidden p-4 md:inset-0" aria-modal="true" role="dialog">
                             <div class="relative max-h-full w-full max-w-md">
-                                <div class="rounded-xl bg-white dark:bg-black shadow-2xl dark:border-gray-600 shadow-black/[.7] border-2">
+                                <div class="rounded-xl bg-white dark:bg-black shadow-2xl dark:border-neutral-700 shadow-black/[.7] border-2">
                                     <div class="flex items-center justify-center p-3" id="progressToastContent">
                                         <svg stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 24 24" class="mr-1 h-5 w-5 animate-spin text-black dark:text-white" xmlns="http://www.w3.org/2000/svg">
                                             <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor"></path>
@@ -616,9 +616,7 @@ function createContent() {
     formData.append('contentType', contentType);
     formData.append('contentLanguage', contentLanguage);
     formData.append('contentHtmlMarkup', contentHtmlMarkup);
-
-    uploadedFiles.forEach((file, index) => { formData.append(`images[]`, file); });
-
+    formData.append('albumImages', uploadedFiles);
 
     $.ajax({
         url: "xhr/dashboard/post/create_post",

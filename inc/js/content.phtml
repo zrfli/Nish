@@ -185,7 +185,7 @@ function loadMorePost(params) {
                 if (data['posts']) { $.each(data.posts, function (key, value) { serializePost(value); }); 
                     morePostStartKey += data.posts.length; 
                     
-                    if (data.posts.length < 6) {loadMoreBtn.remove(); }
+                    if (data.posts.length < 6) { loadMoreBtn.remove(); }
 
                     setProgressToast(1); 
                 } else { setProgressToast(2); }
