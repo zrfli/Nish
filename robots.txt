@@ -1,0 +1,12 @@
+User-Agent: *
+Disallow: /inc
+Disallow: /src
+Disallow: /admin-cp
+Disallow: /admin-panel
+Disallow: /main
+Disallow: /app
+Disallow: /vendor
+Disallow: /api
+Disallow: /socket-server
+Disallow: /node-modules
+Disallow: /dashboard

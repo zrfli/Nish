@@ -1,0 +1,56 @@
+Options -Indexes
+
+RewriteEngine On 
+
+#RewriteCond %{HTTPS} off
+#RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+DirectoryIndex index.php
+
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+<FilesMatch "\.(gif|jpg|jpeg|mp3|xml|mp4|json|png|webp|svg|css|js|webm)$">
+    Header set Cache-Control "public, max-age=31536000"
+</FilesMatch>
+
+RewriteRule ^inc - [F,L]
+RewriteRule ^src - [F,L]
+RewriteRule ^vendor - [F,L]
+
+RewriteRule ^login main/auth/login.php [L]
+
+RewriteRule ^dashboard/([a-zA-Z0-9_-]+)$ main/dashboard/page/$1.php [L]
+RewriteRule ^dashboard main/dashboard/index.php [L]
+
+RewriteRule ^xhr/dashboard/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ main/dashboard/xhr/$1/$2.php [L]
+
+RewriteRule ^not-found main/errors/not-found.php [L]
+RewriteRule ^internal-server-error main/errors/internal-server-error.php [L]
+RewriteRule ^maintenance main/errors/maintenance.php [L]
+
+ErrorDocument 403 /not-found
+ErrorDocument 404 /not-found
+ErrorDocument 500 /internal-server-error
+
+RewriteRule ^xhr/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ xhr/$1/$2.php [L]
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^([a-zA-Z0-9_-]+)$ main/page/static/$1.php [L]
+
+RewriteRule ^page/([a-zA-Z0-9_-]+)$ main/page/dynamic/page.php?slug=$1 [L]
+
+RewriteRule ^([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ main/page/page.php?params=$1&slug=$2 [L]
+
+RewriteRule ^api/v2/payment/gateway/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ api/v2/payment/gateway.php?provider=$1&conversionId=$2 [L]
+RewriteRule ^api/v2/common-pay/bin/([0-9]+)$ api/v2/common-pay/bin.php?bin=$1 [L]

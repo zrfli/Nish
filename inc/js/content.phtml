@@ -1,0 +1,729 @@
+<script async src="node_modules/flowbite/dist/flowbite.min.js"></script>
+<script async type="text/javascript" src="node_modules/dompurify/dist/purify.min.js"></script>
+<?= ($_SERVER['REQUEST_URI'] == '/aday') ? '<script src="node_modules/preline/dist/preline.js"></script>' : ''; ?>
+<script async type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+
+<?php if ($_SERVER['REQUEST_URI'] == '/login'): ?>
+<script type="text/javascript">
+var authUsername;
+var authPassword;
+var authCodes = [];
+
+function Auth(key) {
+    if (key !== 1) {
+        authUsername = DOMPurify.sanitize($('#username').val());
+        authPassword = DOMPurify.sanitize($('#password').val());
+
+        if (authUsername === '' || authPassword === '') { return; }
+
+        authData = { 'authUsername': authUsername, 'authPassword': authPassword }
+
+        $('#authBtn').text('Yükleniyor..').prop('disabled', true).prepend(`<svg stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 24 24" class="animate-spin text-white h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor"></path>
+                                                                            <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
+                                                                        </svg>`);
+
+        $('#loginSpinner').removeClass('hidden');
+    } else {
+        for (var i = 1; i <= 6; i++) {
+            var authCode = DOMPurify.sanitize($('#code-' + i).val());
+            authCodes.push(authCode);
+        }
+
+        authData = { 'authUsername': authUsername, 'authPassword': authPassword ,'authCode': authCodes.join('') }
+    }
+
+    $.post('xhr/auth/login', JSON.stringify(authData), function (response) {
+        if (response.status === 'success' && response.statusCode === 200) {
+            location.reload();
+        } else  {
+            if (response.statusCode === 401 && response['2fa'] && key !== 1) {
+                $('body').prepend(`<div id="setup-2fa-authentication" tabindex="-1" class="fixed pt-20 top-0 left-0 right-0 z-50 h-full w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 justify-center items-center flex backdrop-blur-sm" aria-modal="true" role="dialog">
+                                        <div class="relative w-full max-h-full max-w-xl">
+                                            <div class="rounded-xl shadow-2xl bg-white shadow-black/[.7]">
+                                                <div class="flex items-center justify-between p-4 border-b rounded-t">
+                                                    <h3 class="text-xl font-medium text-gray-900">2FA Kimlik Doğrulama</h3>
+                                                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="setup-2fa-authentication" onclick="$('#setup-2fa-authentication').remove();">
+                                                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+                                                    </svg>
+                                                    </button>
+                                                </div>
+                                                <div class="p-4 h-auto max-h-[30rem] overflow-x-hidden overflow-y-auto">${response['2fa']}</div>
+                                            </div>
+                                        </div>
+                                    </div>`);
+            } else if (response.statusCode === 400) {
+                $('#2faAuthCodeContent').append('<p id="2faAuthCodeError" class="mt-2 text-xs text-red-400 text-center">Kimlik doğrulanamadı. Lütfen doğrulama kodunuzu kontrol edip tekrar girmeyi deneyin.</p>'); 
+                setTimeout(function() { $('#2faAuthCodeError').remove(); }, 3500); 
+            }
+
+            if (key !== 1) {
+                $('#authBtn').text('Giriş yap').prop('disabled', false);
+                $('#error').html(response.message).show();
+                setTimeout(function () { $('#error').html(null).hide(); }, 10000);
+            }
+        }
+    }, 'json');
+
+    authCodes = [];
+}
+
+function passwordRecovery() {
+    var idenityNumber = DOMPurify.sanitize($('#password_recovery_idenity_number').val());
+    var userNumber = DOMPurify.sanitize($('#password_recovery_user_number').val());
+    var birthday = DOMPurify.sanitize($('#password_recovery_birthday').val());
+    var passwordRecoveryMessage = $('#passwordRecoveryMessage');
+    var passwordRecoveryBtn = $('#passwordRecoveryBtn');
+
+    passwordRecoveryBtn.prop('disabled', true);
+                                                                                    
+    if (idenityNumber !== '' || userNumber !== '' || birthday !== '') {
+        $.post("xhr/auth/password_recovery", { idenityNumber: idenityNumber, userNumber: userNumber, birthday: birthday })
+            .done(function(data) {
+                if (data['status'] === 'success' && data['statusCode'] === 200){ 
+                    passwordRecoveryBtn.attr('onclick', `resetPassword('${data.hash}','${data.token}');`); 
+                    $('#passwordRecoveryContent').html(data.passwordRecoveryContent);
+                } else { passwordRecoveryMessage.text(data.passwordRecoveryMessage).show(); }
+            }
+        )
+    } else { passwordRecoveryMessage.text('Alanlar boş bırakılamaz!').show(); }
+    
+    passwordRecoveryBtn.prop('disabled', false);
+    setTimeout(function() { passwordRecoveryMessage.hide(); }, 2000);
+}
+
+function resetPassword(hash, token) {
+    var passwordRecoveryMessage = $('#passwordRecoveryMessage');
+    var token = DOMPurify.sanitize(token);
+    var hash = DOMPurify.sanitize(hash);
+    var password = DOMPurify.sanitize($('#resetPasswordFirstInput').val());
+    var rePassword = DOMPurify.sanitize($('#resetPasswordSecondInput').val());
+
+    if (token !== '' || hash !== '') {
+        $.post("xhr/auth/reset_password", { token: token, hash: hash, password: password, rePassword: rePassword })
+            .done(function(data) {
+                if (data['status'] === 'success' && data['statusCode'] === 200){ 
+                    passwordRecoveryBtn.remove(); 
+                    $('#passwordRecoveryContent').html(data.resetPasswordContent);
+                } else { passwordRecoveryMessage.text(data.resetPasswordMessage).show(); } 
+            }
+        )
+    } else { passwordRecoveryMessage.text('Alanlar boş bırakılamaz!').show(); }
+
+    setTimeout(function() { passwordRecoveryMessage.hide(); }, 2000);
+}
+</script>
+<?php endif; ?>
+
+<?php if ($_SERVER['REQUEST_URI'] != '/maintenance'): ?>
+<script type="text/javascript">
+function misyVeriablesControl() {
+    var body = `<main>
+                    <section class="flex justify-center text-center">
+                        <div class="flex flex-col items-center justify-center h-screen space-y-4 dark:text-white">
+                            <h1 class="text-3xl font-bold">App Error!</h1>
+                            <p class="text-sm"><strong>Warning:</strong> <span class="text-red-400 underline">misy.json</span> file not found or inaccessible! Please check the existence and permissions of the file to resolve the issue.</p>
+                        </div>
+                    </section>
+                </main>`;
+
+    return new Promise((resolve, reject) => {
+        $.getJSON(`misy.json?v=${Math.floor((Math.random() * 100000))}`, function(data) {
+            try { resolve(true); } catch (e) { resolve(false); }
+        })
+        .fail(function(data) {
+            $('body').html(body);
+            resolve(false);
+        });
+    });
+} 
+<?php if ($_SERVER['REQUEST_URI'] == '/aday' || $_SERVER['REQUEST_URI'] == '/announcements' || $_SERVER['REQUEST_URI'] == '/news' || $_SERVER['REQUEST_URI'] == '/events' || $_SERVER['REQUEST_URI'] == '/research' || $_SERVER['REQUEST_URI'] == '/achievements') : ?>
+function setProgressToast(params) {
+    var status = params;
+
+    if (status === 0) {
+        $('body').append(`<div id="progress-toast" tabindex="-1" class="fixed left-0 right-0 top-0 z-50 flex h-full w-full items-end justify-center overflow-y-auto overflow-x-hidden p-4 md:inset-0" aria-modal="true" role="dialog">
+                            <div class="relative max-h-full w-full max-w-md">
+                                <div class="rounded-xl bg-white dark:bg-black shadow-2xl dark:border-neutral-700 shadow-black/[.7] border-2">
+                                    <div class="flex items-center justify-center p-3" id="progressToastContent">
+                                        <svg stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 24 24" class="mr-1 h-5 w-5 animate-spin text-black dark:text-white" xmlns="http://www.w3.org/2000/svg">
+                                            <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor"></path>
+                                            <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
+                                        </svg>
+                                        <span class="text-black dark:text-white">İşlem devam ediyor</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`);
+    } else if (status === 1) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-green-500" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg><span class="text-black dark:text-white">İşlem başarıyla gerçekleşti!</span>`);
+    } else if (status === 2) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-red-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/></svg><span class="text-black dark:text-white">İşlem sırasında bir hata oluştu!</span>`);
+    } else if (status === 3) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-red-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/></svg><span class="text-black dark:text-white">Alanlar boş bırakılamaz!</span>`);
+    } else if (status === 4) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/></svg><span class="text-black dark:text-white">İçerik bulunamadı!</span>`);
+    }
+
+    if (status > 0) { setTimeout(function() { $('#progress-toast').remove(); }, 600); }
+}
+<?php endif; ?>
+
+<?php if ($_SERVER['REQUEST_URI'] == '/announcements' || $_SERVER['REQUEST_URI'] == '/news' || $_SERVER['REQUEST_URI'] == '/events' || $_SERVER['REQUEST_URI'] == '/research' || $_SERVER['REQUEST_URI'] == '/achievements') : ?>
+var morePostStartKey = 6;
+
+function loadMorePost(params) {
+    setProgressToast(0);
+
+    var params = DOMPurify.sanitize(window.location.pathname.split('/').pop());
+    
+    $.post("xhr/post/load_more_post", { params: params, key: morePostStartKey })
+        .done(function(data) {
+            if (data['status'] === 'success' && data['statusCode'] === 200) { 
+                if (data['posts']) { $.each(data.posts, function (key, value) { serializePost(value); }); morePostStartKey += data.posts.length; setProgressToast(1); } else { setProgressToast(2); }
+            } else { $('#loadMorePostContent').remove(); setProgressToast(4); }
+        }) .fail(function(data) { setProgressToast(2); }
+    );
+}
+<?php endif; ?>
+
+var layoutsFooter = [];
+var layoutsHeader = [];
+
+function updateAndDisplayLayoutsFooter(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['layoutsFooterData']){
+            localStorage.setItem('layoutsFooterData', JSON.stringify({ layoutsFooter: data['layoutsFooterData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
+
+            $.each(data['layoutsFooterData'], function (key, value) {
+                if (value.active === 1) { 
+                    var elements = '';
+
+                    $.each(value.element, function (index, element) {
+                        elements += `<li class="mb-2"><a href="${element.url}" rel="noopener noreferrer" class="hover:underline">${element.name}</a></li>`;
+                    });
+
+                    layoutsFooter.push(`<div class="lg:mx-auto">
+                                            <h2 class="mb-3 text-sm font-semibold uppercase text-white underline">${value.category}</h2>
+                                            <ul class="text-gray-400">${elements}</ul>
+                                        </div>`);
+                }
+            });
+
+            $('#layoutContact').removeClass('w-full h-2 bg-gray-400 dark:bg-neutral-800 animate-pulse').html(data['layoutsFooterData'][1]['contact']);
+            $('#contactInformation').nextAll("div").remove().end().after(layoutsFooter.join(''));
+        }
+    }
+}
+
+function getLayoutsFooter() {
+    var storedLayoutsFooter = localStorage.getItem('layoutsFooterData');
+    var parsedData;
+
+    if (storedLayoutsFooter) {
+        try { parsedData = JSON.parse(storedLayoutsFooter); } catch (e) { localStorage.removeItem('layoutsFooterData'); $.post("xhr/layouts/footer").done(updateAndDisplayLayoutsFooter); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {            
+            $.each(parsedData.layoutsFooter, function (key, value) {
+                if (value.active === 1) { 
+                    var elements = '';
+
+                    $.each(value.element, function (index, element) {
+                        elements += `<li class="mb-2"><a href="${element.url}" rel="noopener noreferrer" class="hover:underline">${element.name}</a></li>`;
+                    });
+
+                    layoutsFooter.push(`<div class="lg:mx-auto">
+                                            <h2 class="mb-3 text-sm font-semibold uppercase text-white underline">${value.category}</h2>
+                                            <ul class="text-gray-400">${elements}</ul>
+                                        </div>`);
+                }
+            });
+
+            $('#layoutContact').removeClass('w-full h-2 bg-gray-400 dark:bg-neutral-800 animate-pulse').html(parsedData.layoutsFooter[1]['contact']);
+            $('#contactInformation').nextAll("div").remove().end().after(layoutsFooter.join(''));
+        } else { localStorage.removeItem('layoutsFooterData'); $.post("xhr/layouts/footer").done(updateAndDisplayLayoutsFooter); }
+    } else { $.post("xhr/layouts/footer").done(updateAndDisplayLayoutsFooter); }
+}
+
+function updateAndDisplayLayoutsHeader(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['layoutsHeaderData']){
+            localStorage.setItem('layoutsHeaderData', JSON.stringify({ layoutsHeader: data['layoutsHeaderData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
+
+            $.each(data['layoutsHeaderData'], function (key, value) {
+                if (value) { 
+                    if (value['sub_category']) {
+                        layoutsHeader.push(`<li>
+                                                <button onclick="openTheMegaMenu('${value.name}', '${key}');" class="flex justify-between items-center py-2 lg:py-0 w-full lg:w-auto border-gray-300 text-black hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-gray-600 dark:text-gray-300 lg:dark:text-white dark:hover:text-gray-300 dark:hover:bg-neutral-800/80 dark:border-neutral-700 hover:underline">
+                                                    ${value.name}
+                                                    <svg class="ml-1 w-5 h-5 lg:w-4 lg:h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 0 1 1.414 0L10 10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414" clip-rule="evenodd"/></svg>                                              
+                                                </button>
+                                            </li>`);
+                    } else { layoutsHeader.push(`<li><a href="${value.url}" rel="noopener noreferrer" class="block py-2 border-b border-gray-300 text-black hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-gray-600 lg:p-0 dark:text-gray-300 lg:dark:text-white dark:hover:text-gray-300 dark:hover:bg-neutral-800/80 dark:border-neutral-700 hover:underline">${value.name}</a></li>`); } 
+                }
+            });
+
+            $('#headerMenuContent').removeClass('gap-1').html(layoutsHeader.join(''));
+        }
+    }
+}
+
+function getLayoutsHeader() {
+    var storedLayoutsHeader = localStorage.getItem('layoutsHeaderData');
+    var parsedData;
+
+    if (storedLayoutsHeader) {
+        try { parsedData = JSON.parse(storedLayoutsHeader); } catch (e) { localStorage.removeItem('layoutsHeaderData'); $.post("xhr/layouts/header").done(updateAndDisplayLayoutsHeader); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {            
+            $.each(parsedData.layoutsHeader, function (key, value) {
+                if (value) { 
+                    if (value['sub_category']) {
+                        layoutsHeader.push(`<li>
+                                                <button onclick="openTheMegaMenu('${value.name}', '${key}');" class="flex justify-between border-b items-center py-2 lg:py-0 w-full lg:w-auto border-gray-300 text-black hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-gray-600 dark:text-gray-300 lg:dark:text-white dark:hover:text-gray-300 dark:hover:bg-neutral-800/80 dark:border-neutral-700 hover:underline">
+                                                    ${value.name}
+                                                    <svg class="ml-1 w-5 h-5 lg:w-4 lg:h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 0 1 1.414 0L10 10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414" clip-rule="evenodd"/></svg>                                              
+                                                </button>
+                                            </li>`);
+                    } else { layoutsHeader.push(`<li><a href="${value.url}" rel="noopener noreferrer" class="block py-2 border-b border-gray-300 text-black hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-gray-600 lg:p-0 dark:text-gray-300 lg:dark:text-white dark:hover:text-gray-300 dark:hover:bg-neutral-800/80 dark:border-neutral-700 hover:underline">${value.name}</a></li>`); } 
+                }
+            });
+
+            $('#headerMenuContent').removeClass('gap-1').html(layoutsHeader.join(''));
+        } else { localStorage.removeItem('layoutsHeaderData'); $.post("xhr/layouts/header").done(updateAndDisplayLayoutsHeader); }
+    } else { $.post("xhr/layouts/header").done(updateAndDisplayLayoutsHeader); }
+}
+
+function renderMenuContent(key) {
+    var menuData = localStorage.getItem('layoutsHeaderData');
+    var menuModalContent = $('#menuModalContent');
+    var menuContent = '';
+    var parsedData;
+
+    if (!menuData) { menuModalContent.html(`<p class="text-sm text-red-400 text-center">No data found in localStorage for key: layoutsHeaderData`); return; }
+
+    try { parsedData = JSON.parse(menuData); } catch (e) { menuModalContent.html(e); return; }
+
+    if (!parsedData.layoutsHeader || !parsedData.layoutsHeader[key]) { menuModalContent.html(`<p class="text-sm text-red-400 text-center">An error occurred during the process. Please try again!</p>`); return; }
+
+    $.each(parsedData.layoutsHeader[key].sub_category, function (index, category) {
+        if (category) {
+            menuContent += `
+                <div class="border border-gray-300 px-5 py-5 lg:col-span-1 dark:border-neutral-700">
+                    <h3 class="mb-4 text-sm font-semibold text-black border-b border-gray-300 dark:border-neutral-700 dark:text-white">${category[0]}</h3>
+                    <ul class="space-y-4 text-xs text-gray-900 dark:text-gray-400">`;
+
+            for (var i = 1; i < category.length; i++) {
+                menuContent += `
+                    <li>
+                        <a href="${category[i].url}" rel="noopener noreferrer" class="hover:text-gray-500 dark:hover:text-gray-300">${category[i].name}</a>
+                    </li>`;
+            }
+
+            menuContent += `</ul></div>`;
+        }
+    });
+    
+    menuModalContent.html(`<div class="grid h-auto w-full grid-cols-2 lg:grid-cols-4 overflow-y-auto overflow-x-hidden border border-gray-100 bg-gray-50 lg:max-h-max dark:border-neutral-700 dark:bg-black">${menuContent}</div>`);
+}
+
+
+function openTheMegaMenu(params, key) {
+    $('#mega-menu-modal').remove();
+    
+    var params = DOMPurify.sanitize(params);
+    var key = DOMPurify.sanitize(key);
+
+    if (!params || !key) { return; }
+
+    $('body').append(`<div id="mega-menu-modal" tabindex="-1" class="fixed top-0 left-0 right-0 z-50 h-full w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 justify-center items-center flex backdrop-blur-sm" aria-modal="true" role="dialog">
+                            <div class="relative w-full max-w-4xl max-h-full">
+                                <div class="rounded-xl shadow-2xl bg-white dark:bg-black shadow-black/[.7]" >
+                                    <div class="flex items-center justify-between p-4 border-b border-gray-300 dark:border-neutral-700 rounded-t">
+                                        <h3 class="text-xl font-medium text-black dark:text-white">${params}</h3>
+                                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-gray-300 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="mega-menu-modal">
+                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-4 h-auto max-h-[30rem] overflow-x-hidden overflow-y-auto">
+                                        <div id="menuModalContent">
+                                            <div class="text-center">
+                                                <div role="status">
+                                                    <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`);
+
+    renderMenuContent(key);
+
+    $('[data-modal-hide="mega-menu-modal"]').on('click', function() { $('#mega-menu-modal').remove(); });
+}
+
+<?php if (!isset($_COOKIE['cookie'])): ?>
+function setCookieStatus(data){
+    $.post("xhr/auth/cookie", { status: data })
+        .done(function(response) {
+            $('#cookie-modal').remove();
+        }
+    );
+}
+<?php endif; ?>
+
+<?php if ($_SERVER['REQUEST_URI'] == '/'): ?>
+function putApplyVideo() { $('#applyVideoContent').html(`<source src="assets/static/video/207fa6df-2d62-4f2a-ad52-769580e89e38.webm" type="video/webm" />`); }
+
+var quickAccess = [];
+var contractedBrandsLogos = [];
+
+function updateAndDisplayBrandLogos(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['brandLogosData']){
+            localStorage.setItem('brandLogosData', JSON.stringify({ brandLogos: data['brandLogosData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
+
+            $.each(data['brandLogosData'], function (key, value) {
+                if (value.active === 1) { contractedBrandsLogos.push(`<li><img src="${value.image}" class="w-24 md:w-32 h-full" alt="" decoding="async" /></li>`); }
+            });
+
+            $('#contractedBrandsLogos').html(contractedBrandsLogos.join(''));
+        }
+    }
+}
+
+function updateAndDisplayBaseCarousel(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['baseCarouselData']){
+            localStorage.setItem('baseCarouselData', JSON.stringify({ baseCarousel: data['baseCarouselData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
+
+            $.each(data['baseCarouselData'], function (key, value) {
+                $('#baseCarousel div[data-carousel-item]').removeClass('animate-pulse').each(function(index) {
+                    if (parseInt(index) + 1 === parseInt(key)) {
+                        $(this).find('a').attr('href', value.url);
+                        $(this).find('img').attr('src', value.image);
+                    }
+                });
+            });
+        }
+    }
+}
+
+function updateAndDisplayQuickAccess(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['quickAccessData']){
+            localStorage.setItem('quickAccessData', JSON.stringify({ quickAccess: data['quickAccessData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3000 }));
+
+            $.each(data['quickAccessData'], function (key, value) {
+                if (value.active === 1) {
+                    quickAccess.push(`<a href="${value.url}" class="hover:bg-gray-100 dark:hover:bg-neutral-800/80 dark:bg-neutral-800 mb-3 flex items-center justify-between rounded-lg border-l-8 bg-gray-50 p-3 shadow border dark:border-neutral-700 border-gray-400" target="_blank" rel="noopener noreferrer">
+                                        <span class="text-black dark:text-white text-xs md:text-base font-medium">${value.name}</span>
+                                        <svg class="text-black dark:text-white h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L14.586 11H3a1 1 0 1 1 0-2h11.586l-4.293-4.293a1 1 0 0 1 0-1.414" clip-rule="evenodd"/></svg>
+                                    </a>`);
+                }
+            });
+
+            $('#quickAccessContent').html(quickAccess.join(''));
+        }
+    }
+}
+
+function getQuickAccess() {
+    var storedQuickAccess = localStorage.getItem('quickAccessData');
+    var parsedData;
+
+    if (storedQuickAccess) {
+        try { parsedData = JSON.parse(storedQuickAccess); } catch (e) { localStorage.removeItem('quickAccessData'); $.post("xhr/quick_access/quick_access_list").done(updateAndDisplayQuickAccess); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {            
+            $.each(parsedData.quickAccess, function (key, value) {
+                if (value.active === 1) {
+                    quickAccess.push(`<a href="${value.url}" class="hover:bg-gray-100 dark:hover:bg-neutral-800/80 dark:bg-neutral-800 mb-3 flex items-center justify-between rounded-lg border-l-8 bg-gray-50 p-3 shadow border dark:border-neutral-700 border-gray-400" target="_blank" rel="noopener noreferrer">
+                                        <span class="text-black dark:text-white text-xs md:text-base font-medium">${value.name}</span>
+                                        <svg class="text-black dark:text-white h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L14.586 11H3a1 1 0 1 1 0-2h11.586l-4.293-4.293a1 1 0 0 1 0-1.414" clip-rule="evenodd"/></svg>
+                                    </a>`);
+                }
+            });
+
+            $('#quickAccessContent').html(quickAccess.join(''));
+        } else { localStorage.removeItem('quickAccessData'); $.post("xhr/quick_access/quick_access_list").done(updateAndDisplayQuickAccess); }
+    } else { $.post("xhr/quick_access/quick_access_list").done(updateAndDisplayQuickAccess); }
+}
+
+function getbaseCarousel() {
+    var storedbaseCarousel = localStorage.getItem('baseCarouselData');
+    var parsedData;
+
+    if (storedbaseCarousel) {
+        try { parsedData = JSON.parse(storedbaseCarousel); } catch (e) { localStorage.removeItem('baseCarouselData'); $.post("xhr/carousel/base_carousel").done(updateAndDisplayBaseCarousel); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {            
+            $.each(parsedData.baseCarousel, function (key, value) {
+                $('#baseCarousel div[data-carousel-item]').removeClass('animate-pulse').each(function(index) {
+                    if (parseInt(index) + 1 === parseInt(key)) {
+                        $(this).find('a').attr('href', value.url);
+                        $(this).find('img').attr('src', value.image);
+                    }
+                });
+            });
+        } else { localStorage.removeItem('baseCarouselData'); $.post("xhr/carousel/base_carousel").done(updateAndDisplayBaseCarousel); }
+    } else { $.post("xhr/carousel/base_carousel").done(updateAndDisplayBaseCarousel); }
+}
+
+function getbrandLogos() {
+    var storedBrandsLogogs = localStorage.getItem('brandLogosData');
+    var parsedData;
+
+    if (storedBrandsLogogs) {
+        try { parsedData = JSON.parse(storedBrandsLogogs); } catch (e) { localStorage.removeItem('brandLogos'); $.post("xhr/brand/brand_logos").done(updateAndDisplayBrandLogos); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {            
+            $.each(parsedData.brandLogos, function (key, value) {
+                if (value.active === 1) { contractedBrandsLogos.push(`<li><img src="${value.image}" class="w-24 md:w-32 h-full" alt="" decoding="async" /></li>`); }
+            });
+
+            $('#contractedBrandsLogos').html(contractedBrandsLogos.join(''));
+        } else { localStorage.removeItem('brandLogos'); $.post("xhr/brand/brand_logos").done(updateAndDisplayBrandLogos); }
+    } else { $.post("xhr/brand/brand_logos").done(updateAndDisplayBrandLogos); }
+}
+<?php endif; ?>
+
+<?php if ($_SERVER['REQUEST_URI'] == '/' || $_SERVER['REQUEST_URI'] == '/announcements' || $_SERVER['REQUEST_URI'] == '/news' || $_SERVER['REQUEST_URI'] == '/events' || $_SERVER['REQUEST_URI'] == '/research' || $_SERVER['REQUEST_URI'] == '/achievements'): ?>
+var posts = { announcements: [], news: [], events: [], research: [], achievements: [] };
+
+function updateAndDisplayPosts(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['posts']){
+            localStorage.setItem('posts', JSON.stringify({ posts: data['posts'], expirationDate: new Date().getTime() + 0.5 * 60 * 60 * 1000 }));
+            $.each(data.posts, function (key, value) { serializePost(value); });
+        }
+    }
+}
+
+function serializePost(data){
+    if (!data) { return; }
+
+    if (data.type == 'announcements') {
+        posts.announcements.push(`<article class="flex">
+                                        <div class="mr-4 h-16 w-16 flex-shrink-0 overflow-hidden bg-[#6A5B3E] text-white">
+                                            <div class="pt-2 text-center text-sm font-medium">${data.date.month}</div>
+                                            <div class="text-right text-4xl font-bold">${data.date.day}</div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <a href="${data.url}" rel="noopener noreferrer"><h2 class="text-lg font-bold leading-tight text-black dark:text-white line-clamp-2 hover:underline">${data.title}</h2></a>
+                                            <p class="font-light text-sm line-clamp-2 dark:text-gray-400">${DOMPurify.sanitize(data.description, {USE_PROFILES: {html: false}})}</p>
+                                            <a href="${data.url}" rel="noopener noreferrer" class="text-xs font-medium underline underline-offset-4 text-black dark:text-gray-300 hover:no-underline">Devamını oku</a>
+                                        </div>
+                                    </article>`);
+    } else if (data.type == 'news') {
+        if (window.location.pathname == '/' && posts.news.length > 2) { return; }
+        posts.news.push(`<article class="relative">
+                            <a href="${data.url}" rel="noopener noreferrer" class="flex justify-end">
+                                <img src="${data.image}" class="mb-5 w-full h-full max-w-lg" alt="" ${!(window.matchMedia("(max-width: 767px)").matches && window.location.pathname != '/') ? 'loading="lazy" decoding="async"' : ''} />
+                                <div class="absolute bg-white dark:bg-black text-black dark:text-white py-1 px-2 text-sm font-medium">${data.date}</div>
+                            </a>
+                            <h2 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">
+                                <a href="${data.url}" rel="noopener noreferrer" class="line-clamp-2 hover:underline">${data.title}</a>
+                            </h2>
+                            <a href="${data.url}" rel="noopener noreferrer" class="font-medium underline underline-offset-4 text-black dark:text-gray-300 hover:no-underline text-xs">Devamını oku</a>
+                        </article>`);
+    } else if (data.type == 'events') {
+        posts.events.push(`<article class="flex">
+                                <div class="mr-4 h-16 w-16 flex-shrink-0 overflow-hidden bg-black text-white dark:text-black dark:bg-white">
+                                    <div class="pt-2 text-center text-sm font-medium">${data.date.month}</div>
+                                    <div class="text-right text-4xl font-bold">${data.date.day}</div>
+                                </div>
+                                <div class="space-y-2">
+                                    <a href="${data.url}" rel="noopener noreferrer"><h2 class="text-lg font-bold leading-tight text-black dark:text-white line-clamp-2 hover:underline">${data.title}</h2></a>
+                                    <a href="${data.url}" rel="noopener noreferrer" class="text-xs font-medium underline underline-offset-4 text-black dark:text-gray-300 hover:no-underline">Detaylar</a>
+                                </div>
+                            </article>`);
+    } else if (data.type == 'research') {
+        if (window.location.pathname == '/' && posts.research.length > 2) { return; }
+        posts.research.push(`<article class="relative">
+                                <a href="${data.url}" rel="noopener noreferrer" class="flex justify-end">
+                                    <img src="${data.image}" class="mb-5 w-full h-full max-w-lg" alt="" ${!(window.matchMedia("(max-width: 767px)").matches && window.location.pathname != '/') ? 'loading="lazy" decoding="async"' : ''} />
+                                    <div class="absolute bg-white dark:bg-black text-black dark:text-white py-1 px-2 text-sm font-medium">${data.date}</div>
+                                </a>
+                                <h2 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">
+                                    <a href="${data.url}" rel="noopener noreferrer" class="line-clamp-2 hover:underline">${data.title}</a>
+                                </h2>
+                                <a href="${data.url}" rel="noopener noreferrer" class="font-medium underline underline-offset-4 text-black dark:text-gray-300 hover:no-underline text-xs">Devamını oku</a>
+                            </article>`);
+    } else if (data.type == 'achievements') {
+        if (window.location.pathname == '/' && posts.achievements.length > 3) { return; }
+        //${posts.achievements.length >= 1 ? 'md:col-span-1' : ''}
+
+        posts.achievements.push(`<div class="p-8 col-span-2 md:col-span-1 text-left w-full h-96 bg-no-repeat bg-cover bg-center bg-gray-500 bg-blend-multiply" style="background-image: url('${data.image}');">
+                                    <h2 class="mb-5 max-w-xl text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-white line-clamp-3">${data.title}</h2>
+                                    <a href="${data.url}" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2.5 font-medium text-center text-white border border-white rounded-lg hover:bg-white hover:text-gray-900">Devamını oku</a>
+                                </div>`);
+    }
+
+    var params = window.location.pathname.split('/').pop();
+
+    if (window.location.pathname == '/') { 
+        if (posts[data.type]) { $('#'+data.type+'Content').html(posts[data.type].join('')); }
+    } else { $('#'+params+'Content').html(posts[params].join('')); }
+} 
+
+function getPosts() {
+    var storedPosts = localStorage.getItem('posts');
+    var parsedData;
+
+    if (storedPosts) {
+        try { parsedData = JSON.parse(storedPosts); } catch (e) { localStorage.removeItem('posts'); $.post("xhr/post/base_posts").done(updateAndDisplayPosts); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {  
+            $.each(parsedData.posts, function (key, value) { serializePost(value); });
+        } else { localStorage.removeItem('posts'); $.post("xhr/post/base_posts").done(updateAndDisplayPosts); }
+    } else { $.post("xhr/post/base_posts").done(updateAndDisplayPosts); }
+}
+<?php endif; ?>
+
+<?php if ($_SERVER['REQUEST_URI'] == '/aday'): ?>
+var programList = [];
+
+function getProgramList() {
+    $.post("xhr/program/program_list", function() {})
+        .done(function(data) {
+            if (data['status'] === 'success' && data['statusCode'] === 200) {
+                if (!data.program_list) { $('#programSection').text('<span class="text-black dark:text-white text-xs">Program bulunamadı</span>'); return; }
+                    
+                const select = window.HSSelect.getInstance('#programList');
+                
+                $.each(data['program_list'], function (key, value) {
+                    var programCount = parseInt(key + 1);
+
+                    programList.push(value.id);
+                    select.addOption([ {title: value.department_name, val: value.id, options: { description: value.unit_name, icon: `<span class='font-medium text-xs text-black dark:text-white'>#${parseInt(programCount) < 10 ? '0' + programCount : programCount}</span>` } } ]); 
+                });
+
+                $('#applicationForm').append(`<div class="mt-4">
+                                                    <p class="dark:text-gray-400 text-sm">Forumu göndererek, kişisel verilerimin işlenmesini kabul ediyorum.</p>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button id="applicationSendBtn" class="text-white bg-black hover:bg-black/80 font-medium rounded-lg text-xs w-full py-2.5 text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800" onclick="sendApplication();">Gönder</button>
+                                                </div>`);
+            } else { $('#applicationForm').html('<span class="text-black dark:text-white text-xs">İşlem sırasında bir hata oluştu.</span>'); }
+        })
+        .fail(function(data) {
+            $('#applicationForm').html('<span class="text-black dark:text-white text-xs">İşlem sırasında bir hata oluştu.</span>');
+        }
+    )
+}
+
+function sendApplication() { 
+    setProgressToast(0);
+
+    var fullName = DOMPurify.sanitize($('#fullName').val());
+    var phoneNumber = DOMPurify.sanitize($('#phoneNumber').val());
+    var grade = DOMPurify.sanitize($('#grade').val());
+    var email = DOMPurify.sanitize($('#email').val());
+    const select = window.HSSelect.getInstance('#programList');
+
+    if (fullName !== '' && phoneNumber !== '' && grade !== '' && email !== '' && select.value != '') {
+        $.post("xhr/application/send_application", { fullName: fullName, phoneNumber: phoneNumber, grade: grade, email: email, programList: JSON.stringify(select.value) })
+            .done(function(data) {
+                if (data['status'] === 'success' && data['statusCode'] === 200) { 
+                    setProgressToast(1);
+
+                    $('#applicationForm').html(`<div class="space-y-3 text-black dark:text-gray-300 text-base">
+                                                    <p>Sayın ${fullName},</p> 
+                                                    <p>Başvurunuz başarıyla alınmıştır. En kısa sürede sizinle iletişime geçeceğiz.</p>
+                                                    <p>İlginiz için teşekkür ederiz.</p>
+                                                    <p>Saygılarımızla, Nişantaşı Üniversitesi</p> 
+                                                </div>`);
+
+                    $(window).scrollTop(0);
+                } else { setProgressToast(2); }
+            })
+            .fail(function(data) { setProgressToast(2); }
+        )
+    } else { setProgressToast(3); }
+}
+<?php endif; ?>
+
+function initializePage() {
+    switch (window.location.pathname) {
+        case '/':
+            getQuickAccess();
+            getPosts();
+            getbaseCarousel();
+            getbrandLogos();
+            putApplyVideo();
+            break;
+        case '/notes':
+            getLessonsNotes();
+            break;
+        case '/settings':
+            getAvatarPendings();
+            break;
+        case '/aday':
+            getProgramList();
+            break;
+        case '/announcements': case '/news': case '/events': case '/research': case '/achievements':
+            getPosts();
+            break;
+    }
+}
+
+function onjQueryLoad() {
+    $(document).ready(function () { 
+        //misyVeriablesControl().then((result) => { 
+        //    if (result !== true) { return; }
+
+            getLayoutsHeader();
+            initializePage();
+            getLayoutsFooter();
+        //});
+    });
+}
+
+var storedTheme = localStorage.getItem('color-theme');
+
+if (!storedTheme) { localStorage.setItem('color-theme', 'dark'); }
+
+var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    themeToggleLightIcon.classList.remove('hidden');
+} else {
+    themeToggleDarkIcon.classList.remove('hidden');
+}
+
+var themeToggleBtn = document.getElementById('theme-toggle');
+
+themeToggleBtn.addEventListener('click', function() {
+
+    themeToggleDarkIcon.classList.toggle('hidden');
+    themeToggleLightIcon.classList.toggle('hidden');
+
+    if (localStorage.getItem('color-theme')) {
+        if (localStorage.getItem('color-theme') === 'light') {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('color-theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('color-theme', 'light');
+        }
+    } else {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('color-theme', 'light');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('color-theme', 'dark');
+        }
+    }
+});
+window.addEventListener('load', onjQueryLoad);
+</script>
+<?php endif; ?>
+</body>
+</html>

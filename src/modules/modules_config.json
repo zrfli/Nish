@@ -1,0 +1,14 @@
+{
+    "digital_card": false,
+    "lessons": true,
+    "attendance": true,
+    "take_attendance": true,
+    "avatar_pendings": false,
+    "twofa_authentication": true,
+    "curriculum_list": true,
+    "lesson_selection": true,
+    "notes": true,
+    "note_statics": true,
+    "periods": true,
+    "period_details": true
+}

@@ -1,0 +1,873 @@
+<script async src="node_modules/flowbite/dist/flowbite.min.js"></script>
+<script async type="text/javascript" src="node_modules/dompurify/dist/purify.min.js"></script>
+<!--<script src="node_modules/preline/dist/preline.js"></script>-->
+<script async type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+
+<?php if($_SERVER['REQUEST_URI'] == '/lessons') { ?>
+<script src="node_modules/socket.io/client-dist/socket.io.min.js"></script>
+<?php } ?>
+
+<?php if($auth -> isLoggedIn()){ ?>
+<script type="text/javascript">
+function logOut() {
+    $.post("xhr/dashboard/auth/logout")
+        .done(function(data) {
+            if(data['status'] === 'success' && data['statusCode'] === 200){ localStorage.clear(); location.reload(); }
+        }
+    )
+}
+
+<?php if($_SERVER['REQUEST_URI'] == '/dashboard/settings' || $_SERVER['REQUEST_URI'] == '/dashboard/posts') { ?>
+function setProgressToast(params) {
+    var status = params;
+
+    if(status === 0) {
+        $('body').append(`<div id="progress-toast" tabindex="-1" class="fixed left-0 right-0 top-0 z-50 flex h-full w-full items-end justify-center overflow-y-auto overflow-x-hidden p-4 md:inset-0" aria-modal="true" role="dialog">
+                            <div class="relative max-h-full w-full max-w-md">
+                                <div class="rounded-xl bg-white dark:bg-black shadow-2xl dark:border-gray-600 shadow-black/[.7] border-2">
+                                    <div class="flex items-center justify-center p-3" id="progressToastContent">
+                                        <svg stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 24 24" class="mr-1 h-5 w-5 animate-spin text-black dark:text-white" xmlns="http://www.w3.org/2000/svg">
+                                            <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor"></path>
+                                            <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
+                                        </svg>
+                                        <span class="text-black dark:text-white">İşlem devam ediyor</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`);
+    }
+
+    if(status === 1) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-green-500" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                        </svg>
+                                        <span class="text-black dark:text-white">İşlem tamamlandı!</span>`);
+    }
+
+    if(status === 2) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-red-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                                        </svg>
+                                        <span class="text-black dark:text-white">İşlem sırasında bir hata oluştu!</span>`);
+    }
+
+    if(status === 3) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-red-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+                                        </svg>
+                                        <span class="text-black dark:text-white">Şifreler eşleşmiyor!</span>`);
+    }
+
+    if(status === 4) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-red-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+                                        </svg>
+                                        <span class="text-black dark:text-white">Alanlar boş bırakılamaz!</span>`);
+    }
+
+    if(status === 5) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                        </svg>
+                                        <span class="text-black dark:text-white">İşlem yapılamadı!</span>`);
+    }
+
+    if(status > 0) { setTimeout(function() { $('#progress-toast').remove(); }, 1500); }
+}
+<?php } ?>
+
+<?php if($_SERVER['REQUEST_URI'] == '/dashboard/settings'){ ?>
+var handledFile;
+var profilePictureProcessXhr;
+var avatarPendings = 0;
+var avatarModal;
+var handledSecretKey;
+var authCodes = [];
+
+function twofaAuthentication(key){
+    if (key === 0) {
+        $('#2fasetupStep').hide();
+        $('#2faAuthenticationBackBtn').show().attr('onclick', 'twofaAuthentication(1)');
+        $('#2faAuthenticationStepBtn').attr('onclick', 'twofaAuthentication(2)').text('Devam et');
+        $('#2faBuildStep').show();
+        $('#2faVerifyStep').hide();
+    } else if (key === 1) {
+        $('#2fasetupStep').show();
+        $('#2faAuthenticationBackBtn').hide();
+        $('#2faAuthenticationStepBtn').attr('onclick', 'twofaAuthentication(0)');
+        $('#2faBuildStep').hide();
+    } else if (key === 2) {
+        $('#2faAuthenticationBackBtn').attr('onclick', 'twofaAuthentication(0)');
+        $('#2faAuthenticationStepBtn').text('Tamamla').attr('onclick', 'verify2faAuthentication();');
+        $('#2faBuildStep').hide();
+        $('#2faVerifyStep').show();
+    } else {
+        $('body').prepend(`<div id="setup-2fa-authentication" tabindex="-1" class="fixed pt-20 top-0 left-0 right-0 z-50 h-full w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 justify-center items-center flex backdrop-blur-sm" aria-modal="true" role="dialog">
+                            <div class="relative w-full max-h-full max-w-xl">
+                                <div class="rounded-xl shadow-2xl bg-white shadow-black/[.7]">
+                                    <div class="flex items-center justify-between p-4 border-b rounded-t">
+                                        <h3 class="text-xl font-medium text-gray-900">2FA Kimlik Doğrulama</h3>
+                                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="setup-2fa-authentication" onclick="$('#setup-2fa-authentication').remove();">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+                                        </svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-4 h-auto max-h-[30rem] overflow-x-hidden overflow-y-auto">
+                                        <div id="2faAuthenticationContent">
+                                            <div class="text-center">
+                                                <div role="status">
+                                                    <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`);
+
+        $.post("xhr/dashboard/2fa/2fa_authentication")
+            .done(function(data) {
+                if(data['status'] === 'success' && data['statusCode'] === 200){
+                    handledSecretKey = data['2faSecretKey'];
+                    $('#2faAuthenticationContent').html(data['data']);
+                }
+            }
+        )
+    }
+}
+
+function verify2faAuthentication(key) {
+    var data;
+
+    for (var i = 1; i <= 6; i++) {
+        var authCode = DOMPurify.sanitize($('#code-' + i).val());
+        authCodes.push(authCode);
+    }
+
+    var concatenatedCodes = authCodes.join('');
+
+    if (key !== 0) {
+        var secretKey = DOMPurify.sanitize(handledSecretKey);
+        data = {secretKey : secretKey, authCode : concatenatedCodes};
+    } else {
+        data = { authCode : concatenatedCodes }
+    }
+
+    $.post("xhr/dashboard/2fa/verify_2fa_authentication", data)
+        .done(function(data) {
+            if(data['status'] === 'success' && data['statusCode'] === 200){
+                if (key === 0) { 
+                    $('#2faAuthenticationBtn').text('Kurulum yap').removeClass('bg-red-500').addClass('bg-black hover:bg-black/80');
+                    $('#setup-2fa-authentication').remove(); 
+                } else { 
+                    $('#2faAuthenticationBtn').text('Devre dışı bırak').removeClass('bg-black hover:bg-black/80').addClass('bg-red-500');
+                    $('#2faAuthenticationContent').html(data['data']);
+                }
+            } else { 
+                $('#2faAuthCodeContent').append('<p id="2faAuthCodeError" class="text-xs text-red-400 text-center">Kimlik doğrulanamadı. Lütfen doğrulama kodunuzu kontrol edip tekrar girmeyi deneyin.</p>'); 
+                setTimeout(function() { $('#2faAuthCodeError').remove(); }, 3500); 
+            }
+        }
+    )
+   
+    authCodes = [];
+}
+
+function avatarUploadContent(key) {
+    var element;
+    
+    if(key === 0) { 
+        element = `<p class="mb-2 text-xs text-gray-500 dark:text-gray-400">Dosya formatı JPG,JPEG,PNG ve boyutu en fazla 5MB olmalıdır.</p>
+                   <button type="button" class="flex items-center text-white bg-black hover:bg-black/80 rounded-lg text-xs px-5 py-2.5 dark:hover:bg-neutral-800/80 dark:bg-neutral-800" onclick="handleProfilePicture();">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 13a3.5 3.5 0 0 1-.369-6.98 4 4 0 1 1 7.753-1.977A4.5 4.5 0 1 1 13.5 13H11V9.413l1.293 1.293a1 1 0 0 0 1.414-1.414l-3-3a1 1 0 0 0-1.414 0l-3 3a1 1 0 0 0 1.414 1.414L9 9.414V13z"/><path d="M9 13h2v5a1 1 0 1 1-2 0z"/></svg>
+                    Fotoğraf yükle
+                   </button>`;
+    } else if (key === 1) {
+        element = `<p class="mb-2 text-xs text-gray-500">Fotoğraf değişikliği başvurunuz inceleniyor.</p>
+                   <p onclick="cancelAvatarRequest();" class="cursor-pointer text-xs text-red-400 hover:underline">İptal et</p>`;
+    }
+    
+    return element;
+}
+
+function getAvatarPendings() {
+    $.post("xhr/avatar_pendings")
+        .done(function(data) {
+            if(data['status'] === 'success' && data['statusCode'] === 200){
+                if(data['avatarPendings'] == 1) {
+                    $('#pictureStatus').html(avatarUploadContent(1));
+                } else { 
+                    avatarPendings = 1;
+                    avatarModal = data['avatarModal'];
+                    $('#pictureStatus').html(avatarUploadContent(0));
+                }
+            }
+        }
+    )
+}
+
+function cancelAvatarRequest() {
+    $.post("xhr/cancel_avatar_request")
+        .done(function(data) {
+            if(data['status'] === 'success' && data['statusCode'] === 200){
+                avatarPendings = 1;
+                $('#pictureStatus').html(avatarUploadContent(0));
+                getAvatarPendings();
+            }
+        }
+    )
+}
+
+function updateInformation() {
+    setProgressToast(0);
+
+    var email = DOMPurify.sanitize($('#email').val());
+    var address = DOMPurify.sanitize($('#address').val());
+    var phoneNumber = DOMPurify.sanitize($('#phoneNumber').val());
+
+    if (email !== '' || address !== '' || phoneNumber !== '') {
+        $.post("xhr/dashboard/user/update_information", { email: email, address: address, phoneNumber: phoneNumber })
+            .done(function(data) {
+                if(data['status'] === 'success' && data['statusCode'] === 200){ setProgressToast(1); } else { setProgressToast(5); }
+            })
+            .fail(function(data) { setProgressToast(2); }
+        )
+    } else { setProgressToast(4); } 
+}
+
+function changePassword() {
+    setProgressToast(0);
+
+    var newPassword = DOMPurify.sanitize($('#password').val());
+    var confirmPassword = DOMPurify.sanitize($('#rePassword').val());
+    
+    if (newPassword == '' || confirmPassword == '') { setProgressToast(4); return; }
+
+    if (newPassword !== confirmPassword) { setProgressToast(3); return; }
+
+    $.post("xhr/dashboard/auth/change_password", { password: newPassword, rePassword: confirmPassword })
+        .done(function(data) {
+            if(data['status'] === 'success' && data['statusCode'] === 200){ setProgressToast(1); } else { setProgressToast(5); }
+        })
+        .fail(function(data) { setProgressToast(2); }
+    )
+}
+
+function handleProfilePicture(file) {
+    if(avatarPendings == 1) {
+        if(file) {
+            var file = file.files[0];
+            var fileName = file.name;
+
+            var fileExtension = fileName.split('.').pop().toLowerCase();
+
+            var validExtensions = ['png', 'jpg', 'jpeg'];
+            var maxFileSizeMB = 5;
+
+            var fileSizeKB = file.size / 1024;
+            var fileSizeMB = fileSizeKB / 1024;
+            var fileSizeGB = fileSizeMB / 1024;
+
+            var fileSizeInfo = 'Dosya boyutu: ' +
+                ((fileSizeGB >= 1) ? fileSizeGB.toFixed(2) + ' GB' :
+                    (fileSizeMB >= 1) ? fileSizeMB.toFixed(2) + ' MB' :
+                        fileSizeKB.toFixed(2) + ' KB');
+
+            if(file.size > maxFileSizeMB * 1024 * 1024){
+                alert('Dosya boyutu çok büyük. Maksimum dosya boyutu: ' + maxFileSizeMB + ' MB');
+                return;
+            }
+
+            if ($.inArray(fileExtension, validExtensions) === -1) {
+                alert('Dosya türü desteklenmiyor. Lütfen geçerli bir dosya seçin.');
+                return;
+            }
+
+            $('#handleInput').hide();
+            $('#uploadAction').show();
+            $('#fileName').text(fileName);
+            $('#fileSize').text(fileSizeInfo);
+
+            handledFile = file;
+        } else { 
+            $('#upload-profile-picture').remove();
+            $('body').prepend(avatarModal);
+        }
+    }
+}
+
+function uploadProfilePicture() {
+    if(avatarPendings == 1 && handledFile) {
+        $("#fileActionPanel").html(`<svg stroke="currentColor" fill="none" stroke-width="0" viewBox="0 0 24 24" class="h-4 w-4 animate-spin text-black" xmlns="http://www.w3.org/2000/svg">
+                                        <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor"></path>
+                                        <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
+                                    </svg>
+                                    <svg onclick="abortUpload();" class="flex-shrink-0 w-4 h-4 hover:text-gray-900 cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                                    </svg>`);
+
+        var formData = new FormData();
+        formData.append('file', handledFile);
+
+        profilePictureProcessXhr = new XMLHttpRequest();
+
+        profilePictureProcessXhr.addEventListener("load", function (e) {
+            try {
+                var responseData = JSON.parse(profilePictureProcessXhr.responseText);
+
+                if (responseData && typeof responseData === 'object') {
+                    if (responseData['status'] === 'success' && responseData['statusCode'] === 200) {
+                        avatarPendings = 0;
+
+                        $('#pictureStatus').html(avatarUploadContent(1));
+                        $('#handleInput').show();
+                        $('#uploadAction').hide();
+                        $('#upload-profile-picture').remove();
+                    } else { $('#upload-profile-picture').remove(); }
+                } else {
+                    console.log('json format error');
+                }
+            } catch (error) {
+                console.log('json parse error:');
+            }
+        }, false);
+
+        profilePictureProcessXhr.addEventListener("error", function (e) {
+            $('#upload-profile-picture').remove();
+        }, false);
+
+        profilePictureProcessXhr.open("POST", 'xhr/upload_profile_picture');
+        profilePictureProcessXhr.send(formData);
+
+        $('#documentInput').val(null);
+        handledFile = '';
+    }
+}
+
+function abortUpload() {
+    if (profilePictureProcessXhr) { 
+        profilePictureProcessXhr.abort(); 
+        profilePictureProcessXhr = '';
+        
+        handleProfilePicture();
+    }
+}
+<?php } ?>
+
+<?php if($auth -> hasRole(\Delight\Auth\Role::STUDENT)){ ?>
+function getDigitalCard() {
+    $('#digitalCard').html(`<div class="text-center">
+                                <div role="status">
+                                    <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                </div>
+                            </div>`);
+                            
+    $.post("xhr/digital_card", function() {})
+        .done(function(data) {
+            if(data['status'] === 'success' && data['statusCode'] === 200){
+                $('#digitalCardCall').attr('onclick', null);
+                $('#digitalCard').html(data['card']);
+            }
+        }
+    )
+}
+<?php } ?>
+
+<?php  if($_SERVER['REQUEST_URI'] == '/dashboard/posts'): ?>
+const paymentError = `<div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-gray-600" role="alert">
+                        <p class="text-sm text-yellow-600 text-center">İşlem sırasında bir hata oluştu. Lütfen tekrar deneyiniz.</p>
+                    </div>`;
+var bankTransferInformationJson;
+var documentProcessXhr;
+var handledFile;
+var paymentStatus;
+var discountStatus = 0;
+var paymentModal;
+var paymentAmount;
+var discountPercentage = 0;
+var lastCardNumber;
+var cardBrandCode;
+var paymentType;
+
+const maxFiles = 10;
+const maxFileSize = 5 * 1024 * 1024;
+const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+let uploadedImages = [];
+let uploadedFiles = [];
+
+function createPost() {
+    $('body').prepend(`<div id="payment-modal" tabindex="-1" class="fixed pt-20 top-0 left-0 right-0 z-50 h-full w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 justify-center items-center flex backdrop-blur-sm" aria-modal="true" role="dialog">
+                            <div class="relative w-full max-w-md max-h-full" id="paymentPanel">
+                                <div class="rounded-xl shadow-2xl bg-white shadow-black/[.7]" >
+                                    <div class="flex items-center justify-between p-4 border-b rounded-t">
+                                        <h3 class="text-xl font-medium text-gray-900">İçerik Oluşturma Aracı</h3>
+                                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="payment-modal" onclick="$(\'#payment-modal\').remove();">
+                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-4 h-auto max-h-[30rem] overflow-x-hidden overflow-y-auto" id="paymentContent">
+                                        <div id="paymentSection">
+                                            <div class="text-center">
+                                                <div role="status">
+                                                    <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex border-t divide-x border-gray-200 divide-gray-200" id="paymentFooter" style="display: none;">
+                                        <button id="paymentBackBtn" onclick="paymentBack();" class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-medium text-gray-600 rounded-xl shadow-sm bg-slate-50 hover:bg-gray-100">
+                                        Geri dön
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`);
+    getPostSchema();
+}
+
+function getPostSchema() {
+    var items = [];
+
+    $.post("xhr/dashboard/post/post_schema", function() {})
+        .done(function(data) {
+            if (data['status'] === 'success' && data['statusCode'] === 200) {
+                $.each(data['postSchema'], function (key, value) {
+                    if(value.active === 1) {
+                        items.push(`<li>
+                                        <div class="flex items-center rounded-lg bg-gray-50 p-3 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer" onclick="postMethod('${value.type}');">
+                                            <span class="flex-1 whitespace-nowrap">${value.name}</span>
+                                        </div> 
+                                    </li>`);
+                    }
+                });
+
+                $('#paymentSection').html("<ul class='space-y-3'>" + items.join("") + "</ul>");
+            } 
+        })
+        .fail(function(data) {
+            $('#paymentContent').html(paymentError);        
+        }
+    )
+}
+
+function postMethod(type) {
+    $('#paymentPanel').removeClass('max-w-md').addClass('max-w-4xl');
+    $('#paymentSection').html(`<div class="text-center">
+                                    <div role="status">
+                                        <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                    </div>
+                                </div>`);
+
+    $.post("xhr/dashboard/post/post_method", { postMethod: type })
+        .done(function(data) {
+            if (data['status'] === 'success' && data['statusCode'] === 200) {
+                if (type === 'bank_transfer') {
+                    bankTransferInformationJson = data['bankTransferInformation'];
+                    if ($('#paymentBackBtn').attr('onclick') === 'postMethod("bank_transfer");') {
+                        $('#paymentBackBtn').attr('onclick', 'paymentBack();');
+                    }
+                } 
+
+                $('#paymentFooter').show();
+                $('#paymentSection').html(data['data']);
+            } else { getPostSchema(); }
+        })
+        .fail(function(data) {
+            $('#paymentContent').html(paymentError);
+        }
+    )
+}
+
+function paymentBack() {
+    $('#paymentFooter').hide();
+    $('#paymentPanel').removeClass('max-w-4xl').addClass('max-w-md');
+    $('#paymentSection').html(`<div class="text-center">
+                                    <div role="status">
+                                        <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                    </div>
+                                </div>`);
+    getPostSchema();
+}
+
+function bankTransferInformation(key) {
+    if(!bankTransferInformationJson[key]) { $('#paymentSection').html(paymentError); return; }
+   
+    $('#transferredBankName').text(bankTransferInformationJson[key]['name']);
+    $('#transferredBankIban').text(bankTransferInformationJson[key]['iban']);
+    $('#paymentBackBtn').attr('onclick', 'postMethod("bank_transfer");');
+    $('#bankPanel').remove();
+    $('#actionMessage').remove();
+    $('#paymentDetailsTable').show();
+    $('#documentPanel').show();    
+}
+
+function handleDocumentInput(file) {
+    if (file) {
+        var coverImageInput = $('#coverImageInput');
+
+        var file = file.files[0];
+        var fileName = file.name;
+
+        var fileExtension = fileName.split('.').pop().toLowerCase();
+
+        var validExtensions = ['webp', 'png', 'jpg', 'jpeg', 'gif'];
+        var maxFileSizeMB = 20;
+
+        var fileSizeKB = file.size / 1024;
+        var fileSizeMB = fileSizeKB / 1024;
+        var fileSizeGB = fileSizeMB / 1024;
+
+        var fileSizeInfo = 'Dosya boyutu: ' +
+            ((fileSizeGB >= 1) ? fileSizeGB.toFixed(2) + ' GB' :
+                (fileSizeMB >= 1) ? fileSizeMB.toFixed(2) + ' MB' :
+                    fileSizeKB.toFixed(2) + ' KB');
+
+        if(file.size > maxFileSizeMB * 1024 * 1024){
+            alert('Dosya boyutu çok büyük. Maksimum dosya boyutu: ' + maxFileSizeMB + ' MB');
+            coverImageInput.val('');
+            return;
+        }
+
+        if ($.inArray(fileExtension, validExtensions) === -1) {
+            alert('Dosya türü desteklenmiyor. Lütfen geçerli bir dosya seçin.');
+            coverImageInput.val('');
+            return;
+        }
+
+        handledFile = file;
+    }
+}
+
+function validateFiles(files) {
+    return files.filter(file => acceptedFileTypes.includes(file.type) && file.size <= maxFileSize);
+}
+
+function addFiles(files) {
+    const validFiles = validateFiles(files);
+    if (validFiles.length + uploadedImages.length > maxFiles) {
+        alert(`En fazla ${maxFiles} resim yükleyebilirsiniz.`);
+        return;
+    }
+    validFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            uploadedImages.push(event.target.result);
+            uploadedFiles.push(file);
+            updateImagePreview();
+        }
+        reader.readAsDataURL(file);
+    });
+}
+
+function updateImagePreview() {
+    $('#imagePreview').empty();
+    uploadedImages.forEach((imageSrc, index) => {
+        const imgHtml = `
+            <div class="relative">
+                <img src="${imageSrc}" alt="image" class="max-w-[100px] max-h-[100px] object-cover rounded-lg shadow">
+                <button class="remove-image absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center" onclick="deleteAlbumImage(${index})">X</button>
+            </div>`;
+        $('#imagePreview').append(imgHtml);
+    });
+}
+
+function removeImage(index) {
+    uploadedImages.splice(index, 1);
+    uploadedFiles.splice(index, 1);
+    updateImagePreview();
+}
+
+function albumInput(images) {
+    addFiles(Array.from(images.files));
+    $(this).val(''); 
+}
+
+function deleteAlbumImage(key) { removeImage(key); }
+
+function previewText(text){
+    $('#ContentPrewiew').html(text);
+}
+
+function createContent() {
+    setProgressToast(0);
+
+    var formData = new FormData();
+
+    var contentValidType = ['news', 'events', 'research', 'announcements', 'achievements'];
+    var contentValidLanguage = ['tr', 'en'];
+
+    var contentTitle = DOMPurify.sanitize($('#contentTitle').val());
+    var contentCoverImage = handledFile;
+    var contentType = DOMPurify.sanitize($('#contentType').val());
+    var contentLanguage = DOMPurify.sanitize($('#contentLanguage').val());
+    var contentHtmlMarkup = tinymce.activeEditor.getContent();
+
+    if (!contentValidType.includes(contentType)) { setProgressToast(4); return; }
+    if (!contentValidLanguage.includes(contentLanguage)) { setProgressToast(4); return; }
+
+    if (contentTitle == '' || contentHtmlMarkup == '') { setProgressToast(4); return; }
+    if (!contentCoverImage && (contentType == 'news' || contentType == 'research' || contentType == 'achievements')) { setProgressToast(4); return; }
+
+    formData.append('contentTitle', contentTitle);
+    formData.append('contentCoverImage', handledFile);
+    formData.append('contentType', contentType);
+    formData.append('contentLanguage', contentLanguage);
+    formData.append('contentHtmlMarkup', contentHtmlMarkup);
+
+    uploadedFiles.forEach((file, index) => { formData.append(`images[]`, file); });
+
+
+    $.ajax({
+        url: "xhr/dashboard/post/create_post",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(data) {
+            if(data['status'] === 'success' && data['statusCode'] === 200) { 
+                setProgressToast(1); 
+                $('#contentTitle').val('');
+                $('#contentCoverImage').val('');
+                $('#contentType').val('');
+                $('#coverImageInput').val('');
+
+                tinymce.activeEditor.setContent('');
+                localStorage.clear('posts');
+                return;
+            }
+            
+            setProgressToast(2);
+        },
+        error: function() {
+            setProgressToast(2);
+        }
+    });
+
+    handledFile = '';
+}
+
+function abortUpload(key) {
+    if(key == 1){
+        paymentMethod(1);
+        $('#paymentBackBtn').attr('onclick', 'paymentBack();');
+    }
+
+    if (documentProcessXhr) { 
+        documentProcessXhr.abort(); 
+        documentProcessXhr = '';
+
+        if($('#paymentBackBtn').attr('onclick') == 'abortUpload(1);'){
+            $('#paymentBackBtn').attr('onclick', 'paymentMethod(1);');
+        }
+
+        $('#uploadingFilePanel').hide();
+        $('#fileActionPanel').hide();
+        $('#barTotal').text(0 + '%');
+        $('#barWidth').css('width', 0);
+        $('#documentPanel').show();
+    }
+}
+
+function calculateInstallments(principal, annualInterestRate, installments, installmentStatus) {
+    const selectElement = $("#installmentsSelect");
+    const discountedAmount = (principal * discountPercentage / 100).toFixed(2);
+
+    selectElement.append(`<option value="0">Tek Çekim: ${principal.toFixed(2) - discountedAmount}₺ ${discountPercentage > 0 ? ` (İndirim Oranı: ${discountPercentage}%)` : ''}</option>`);
+
+    if (installmentStatus === true) { 
+            installments.forEach(months => {
+                const monthlyInterestRate = annualInterestRate / 2 / 100;
+                const numerator = monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months);
+                const denominator = Math.pow(1 + monthlyInterestRate, months) - 1;
+
+                const installmentAmount = principal * (numerator / denominator);
+                const totalPayment = installmentAmount * months;
+
+                selectElement.append(`<option value="${months}">${months} Taksit: ${installmentAmount.toFixed(2)} - Toplam Ödeme: ${totalPayment.toFixed(2)}₺</option>`);
+        });
+    }
+}
+
+function processCardDetails(cardNumber) {
+    return new Promise(function(resolve, reject) {
+        var numericCardNumber = parseInt(cardNumber, 10);
+        var cardIcons = '';
+
+        if (isNaN(numericCardNumber) || numericCardNumber.toString().length <= 14) {
+            $('#installmentsContent').remove(); $('#payBtn').remove(); $('#cardLogoContainer').html(null).hide();
+            return;
+        } 
+        
+        if (cardNumber === lastCardNumber || numericCardNumber.toString().length > 16) { return; }
+
+        $.post("api/v2/common-pay/bin/" + cardNumber.toString().slice(0, 6))
+            .done(function(data) {
+                if (data['status'] === 'success' && data['statusCode'] === 200) {
+                    if (!data.bankDetail) { reject("parameter error."); return; }
+
+                    if (data.bankDetail.cardProgramIcon) { cardIcons += `<img src="${data.bankDetail.cardProgramIcon}" class="h-full w-12" alt="" loading="lazy" decoding="async" />`; }
+
+                    if (data.bankDetail.cardBrandIcon) { cardIcons += `<img src="${data.bankDetail.cardBrandIcon}" class="h-full w-12" alt="" loading="lazy" decoding="async" />`; }
+
+                    $('#cardLogoContainer').html(cardIcons).show();
+
+                    if ($('#installmentsContent').length === 0) { 
+                        $('#cardDetailsContent').append(`<div id="installmentsContent" class="col-span-2">
+                                                            <label for="installmentsSelect" class="block mb-2 text-sm font-medium text-gray-900">Ödeme Seçenekleri</label>
+                                                            <select id="installmentsSelect" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-xs text-gray-900 focus:outline-none focus:ring-0 focus:border-black font-medium"></select>
+                                                        </div>`);
+                        $('#paymentSection').append(`<div class="flex justify-end mt-4" id="payBtn">
+                                                        <button type="button" class="text-white flex bg-black hover:bg-black/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center" onclick="payWithCard();">
+                                                        Şimdi öde
+                                                        </button>
+                                                    </div>`);
+
+                        $.getScript("assets/js/vpos.js")
+                            .done(function (script, textStatus) {
+                                console.log("Script loaded successfully");
+                            })
+                            .fail(function (jqxhr, settings, exception) {
+                                console.error("Error loading script:", exception);
+                        });
+                    } else { $("#installmentsSelect").empty(); }
+
+                    cardIcons = '';
+                    lastCardNumber = numericCardNumber;
+                    cardBrandCode = data.bankDetail.cardBrandCode;
+                    calculateInstallments(parseFloat(paymentAmount.replace(/[,.]/g, ''), 10), 2, [3, 6, 9], data.bankDetail.installment);
+                } else { reject("API isteği başarısız oldu."); }
+            })
+            .fail(function() {
+                reject("Post isteği başarısız oldu.");
+        });
+    });
+}
+
+function payWithCard(key) {
+    var cardHolderName = DOMPurify.sanitize($('#cardHolderName').val());
+    var cardNumber = DOMPurify.sanitize($('#cardNumber').val());
+    var cardExpMonth = DOMPurify.sanitize($('#cardExpMonth').val());
+    var cardExpYear = DOMPurify.sanitize($('#cardExpYear').val());
+    var cardCvv = DOMPurify.sanitize($('#cardCvv').val());
+    var installment = DOMPurify.sanitize($('#installmentsSelect').val());
+
+    if (installment >= 0 && cardHolderName.trim() !== '' && cardNumber.trim() !== '' && cardExpMonth.trim() !== '' && cardExpYear.trim() !== '' && cardCvv.trim() !== '' && cardNumber.length >= 15 && cardCvv.length >= 3) {
+        $('#paymentBackBtn').prop('disabled', true).hide();
+        $('#paymentSection').html(`<div class="text-center">
+                                        <div role="status">
+                                            <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                        </div>
+                                    </div>`);
+
+        $.post("xhr/create_payment_request", { paymentType: 'credit_card', cardHolderName: cardHolderName, cardNumber: cardNumber, expMonth: cardExpMonth, expYear: cardExpYear, cardCvv: cardCvv, installment: installment })
+            .done(function(data) {
+                const processBankResponse = { 'garanti': garanti, 'akbank': akbank, 'finansbank': finansbank, 'halkbank': halkbank, 'teb': teb, 'isbank': isbank, 'sekerbank': sekerbank, 'yapikredi': yapikredi, 'albaraka': albaraka, 'ziraat': ziraat, 'denizbank': denizbank, 'kuveytpos': kuveytpos, 'hsbc': hsbc, 'vakifbank': vakifbank }[ data.clientKey ] || vakifbank;
+                
+                processBankResponse(data.paymentContent);
+            }
+        )
+    }
+}
+
+function payWithProvider(type) {
+    var provider = DOMPurify.sanitize(type).trim();
+    var paymentBackBtn = $('#paymentBackBtn').show();
+
+    if (provider !== '') {
+        paymentBackBtn.hide();
+
+        $.post("xhr/create_payment_request", { paymentType : provider })
+            .done(function(data) {
+                if (/^(http(s)?:\/\/|www\.)\S+/i.test(data.paymentContent)) {
+                    $.getScript("assets/js/vpos.js")
+    
+                    $('#paymentSection').html(`<iframe id="paymentIframe" class="w-full" style="height: 61rem;" scrolling="no" src="${data.paymentContent}"></iframe>`);
+                } else {
+                    paymentBackBtn.show();
+                    $('#paymentSection').text(data.paymentContent);
+                }
+            })
+            .fail(function(data) {
+                $('#paymentSection').html(paymentError);
+            });
+    }
+}
+<?php endif; ?>
+
+function initializePage() {
+    switch (window.location.pathname) {
+        case '/':
+            getUserCredential();
+        break;
+        case '/notes':
+            getLessonsNotes();
+        break;
+        case '/lessons':
+            getLessons();
+            break;
+        case '/periods':
+            getPeriods();
+            break;
+        case '/payments':
+            getGrants();
+            paymentAmount();
+            break;
+        case '/settings':
+            getAvatarPendings();
+            break;
+        case '/curriculum':
+            getCurriculum();
+            break;
+        case '/lesson-selection':
+            getLessonSelection();
+            getBalance();
+            break;
+    }
+}
+
+function onjQueryLoad() {
+    $(document).ready(function () { initializePage(); });
+}
+
+var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    themeToggleLightIcon.classList.remove('hidden');
+} else {
+    themeToggleDarkIcon.classList.remove('hidden');
+}
+
+var themeToggleBtn = document.getElementById('theme-toggle');
+
+themeToggleBtn.addEventListener('click', function() {
+
+    themeToggleDarkIcon.classList.toggle('hidden');
+    themeToggleLightIcon.classList.toggle('hidden');
+
+    if (localStorage.getItem('color-theme')) {
+        if (localStorage.getItem('color-theme') === 'light') {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('color-theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('color-theme', 'light');
+        }
+    } else {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('color-theme', 'light');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('color-theme', 'dark');
+        }
+    }
+});
+window.addEventListener('load', onjQueryLoad);
+</script>
+<?php } ?>
+</body>
+</html>

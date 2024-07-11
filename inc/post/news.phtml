@@ -1,0 +1,43 @@
+<main class="mt-20 lg:mt-24">
+    <section class="w-full h-64 bg-no-repeat bg-cover bg-center relative border-b border-gray-700" style="background-image: url('assets/img/static/ebbb311c-1696-44ac-838a-6194dd216016.webp');">
+        <div class="absolute top-20 left-1/2 px-4 mx-auto w-full max-w-screen-xl -translate-x-1/2 xl:top-1/2 xl:-translate-y-1/2 xl:px-0">
+            <h1 class="mb-4 max-w-4xl text-3xl font-extrabold text-white"><?= $element['postTitle'] ?? 'Error'; ?></h1>
+            <p class="font-normal text-gray-300"><?= $element['time'] ?? 'Error'; ?></p>
+        </div>
+    </section>
+    <section class="flex relative z-20 min-h-96 justify-center px-4 mx-auto max-w-screen-lg">
+        <div class="w-full py-6">
+            <div class="space-y-4 text-gray-900 dark:text-gray-300 h-full">
+                <?= isset($element['postText']) ? manipulateTheElement($element['postText']) : 'Error'; ?>
+            </div>
+        </div>
+    </section>
+    <?php if (isset($element['postFile'])): $data = json_decode($element['postFile'], true); if (!empty($data['picture'])): ?>
+    <section aria-label="contentGallery" class="mb-16">
+        <div class="px-4 mx-auto max-w-screen-xl">
+            <div class="flex justify-center mb-6">
+                <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 md:text-4xl dark:text-white">Görseller</h2>
+            </div>
+            <div id="carousel-section" class="relative" data-carousel="static">
+                <div class="relative h-96 overflow-hidden">
+                    <?php foreach ($data['picture'] as $item): ?>
+                        <div class="duration-400 ease-linear absolute inset-0 transition-transform transform translate-x-0 z-30" data-carousel-item="">
+                            <img src="<?= $item['url'] ?>" class="object-cover h-full w-full" alt="" loading="lazy" decoding="async" />
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" aria-hidden="true" tabindex="-1" data-carousel-prev="">
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60">
+                        <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/></svg>
+                    </span>
+                </button>
+                <button type="button" class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" aria-hidden="true" tabindex="-1" data-carousel-next="">
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60">
+                        <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/></svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </section>
+    <?php endif; endif; ?>
+</main>

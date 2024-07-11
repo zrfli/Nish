@@ -1,0 +1,76 @@
+<main class="bg-white">
+  <div class="grid h-screen lg:grid-cols-2">
+    <div class="flex items-center justify-center px-4 py-6">
+
+      <div id="password-recovery-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <div class="relative bg-white rounded-lg shadow">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                    <h3 class="text-xl font-semibold text-gray-900">Şifre Yenileme</h3>
+                    <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="password-recovery-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-4 md:p-5">
+                    <div class="space-y-4">
+                        <div id="passwordRecoveryContent">
+                            <label for="password_recovery_user_number" class="block mb-2 text-sm font-medium text-gray-900">Öğrenci / Sicil Numarası</label>
+                            <input type="text" id="password_recovery_user_number" class="focus:ring-0 focus:border-black block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-xs font-medium text-gray-900" placeholder="••••••••••••••••" maxlength="16" required />
+                            <label for="password_recovery_idenity_number" class="block mb-2 text-sm font-medium text-gray-900">T.C. Kimlik No</label>
+                            <input type="text" id="password_recovery_idenity_number" class="focus:ring-0 focus:border-black block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-xs font-medium text-gray-900" placeholder="••••••••••••••••" maxlength="11" required />
+                            <label for="password_recovery_birthday" class="block mb-2 text-sm font-medium text-gray-900">Doğum Tarihi</label>
+                            <input type="date" id="password_recovery_birthday" class="focus:ring-0 focus:border-black block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-xs font-medium text-gray-900" required />
+                        </div>
+                        <div id="passwordRecoveryMessage" class="text-red-400 text-sm" style="display: none;"></div>
+                        <button id="passwordRecoveryBtn" itype="button" class="flex w-full rounded-lg bg-black px-5 py-2.5 items-center justify-center text-sm font-medium text-white hover:bg-black/80" onclick="passwordRecovery();">Gönder</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div> 
+
+      <form class="w-full max-w-md space-y-4 md:space-y-6 xl:max-w-xl">
+        <h1 class="text-xl font-bold text-gray-900">İstanbul Nişantaşı Üniversitesi Bilgi Yönetim Sistemi</h1>
+        <div class="items-center space-x-0 space-y-3 sm:flex sm:space-x-4 sm:space-y-0">
+          <a href="#" class="inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-900">
+            <svg class="mr-2 h-5 w-5" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#a)"><path d="M20.308 10.23c0-.68-.055-1.363-.173-2.032h-9.432v3.851h5.402a4.63 4.63 0 0 1-2 3.039v2.499h3.223c1.893-1.742 2.98-4.314 2.98-7.357" fill="#3F83F8"/><path d="M10.702 20c2.697 0 4.971-.885 6.629-2.413l-3.223-2.5c-.897.61-2.054.956-3.402.956-2.61 0-4.821-1.76-5.615-4.126H1.766v2.576A10 10 0 0 0 10.702 20" fill="#34A853"/><path d="M5.089 11.917a6 6 0 0 1 0-3.829V5.512H1.767a10.01 10.01 0 0 0 0 8.98z" fill="#FBBC04"/><path d="M10.702 3.958a5.43 5.43 0 0 1 3.836 1.5l2.855-2.856A9.6 9.6 0 0 0 10.702.001a10 10 0 0 0-8.936 5.511l3.321 2.576c.79-2.37 3.006-4.13 5.615-4.13" fill="#EA4335"/></g><defs><clipPath id="a"><path fill="#fff" d="M.5 0h20v20H.5z"/></clipPath></defs></svg> 
+            Authenticator İle Giriş
+          </a>
+          <a href="#" class="inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-red-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-500/90">
+            <svg class="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="#fff" width="20" height="15.255" viewBox="0 0 20 15.255"><path d="M18.478 1.205c.474.382.791.896.889 1.501.113 1.411-.475 2.647-1.364 3.723-.557.615-1.14 1.24-1.799 1.746l-.146.146a13 13 0 0 1-.301.201c-.284.186-.554.385-.821.595-.118.08-.118.08-.264.08l-.073.146-.219.073-.146.146q-.253.143-.511.276c-.156.078-.156.078-.219.235l-.154.029c-.27.056-.494.176-.735.304-.48.251-.48.251-.644.251v.146h-.365l-.073.146-.146-.073-.073.146c-.355.178-.718.283-1.101.382a16 16 0 0 0-.427.118c-.35.101-.657.186-1.026.157l-.073.146a7 7 0 0 1-.625.096l-.188.02c-.611.054-1.151-.047-1.742-.189h-.146v-.146l-.16-.055c-.347-.154-.528-.301-.703-.643-.087-.251-.087-.251-.087-.47l-.146-.073c-.017-.346.044-.619.146-.949q.04-.182.073-.365h.146l.059-.155c.261-.63.625-1.052 1.109-1.524l.178-.182c.494-.482 1.065-.968 1.72-1.205v-.146c1.374-.667 2.641-1.207 4.183-1.3l.184-.012q.225-.008.45-.002l.146.146a6 6 0 0 1-1.022.219l-.219.073-.365.073-.16.041c-.131.032-.131.032-.277.032v.146l-.141.018c-.367.09-.756.222-1.026.493q-.165.1-.333.196c-1.004.599-1.845 1.373-2.223 2.505-.036.381-.046.702.114 1.054.434.456.901.55 1.514.567 1.736.023 3.3-.332 4.795-1.256l.139-.084.468-.286.148-.091c.537-.316.537-.316.924-.78l.128-.055c.168-.093.238-.171.356-.319l.173-.21h.146v-.146h.146l.068-.137.151-.301h.146l.073-.292h.146l.055-.146a11 11 0 0 1 .237-.529l.073-.152c.073-.122.073-.122.219-.195.093-.212.153-.435.219-.657L18 4.307c.174-.628.229-1.186.012-1.808a3 3 0 0 1-.129-.601l-.219-.073a13 13 0 0 1-.292-.292l-.146-.073v-.146l-.246-.027c-.265-.046-.265-.046-.411-.192-.156-.031-.156-.031-.328-.041-.315-.025-.315-.025-.474-.105-.273-.018-.547-.014-.821-.014h-.24a8.7 8.7 0 0 0-1.515.128 3 3 0 0 1-.563.032v.146l-.214.023a3.7 3.7 0 0 0-.799.224c-.155.045-.155.045-.447.045l-.073.146-.511.073-.073.146a6 6 0 0 1-.374.155c-.375.151-.733.321-1.09.511l-.142.074a2.3 2.3 0 0 0-.583.427q-.182.074-.365.146a13 13 0 0 0-.452.292l-.231.155c-.194.13-.194.13-.34.284q-.124.095-.251.187l-.333.251-.168.126c-1.906 1.49-3.916 3.759-4.357 6.224-.082.829-.078 1.605.426 2.302.722.821 1.892 1.038 2.931 1.129 2.735.168 5.61-.76 7.956-2.117l.252-.145q.313-.181.624-.366l.073.219c-.195.16-.341.233-.584.292l-.073.146c-.127.076-.127.076-.283.151l-.155.076c-.145.065-.145.065-.364.138v.146l-.16.023c-.223.055-.376.149-.57.269h-.146l-.073.146c-.186.082-.375.15-.566.219-.176.057-.176.057-.237.219-.138.044-.138.044-.31.078l-.179.036-.168.032-.224.046-.141.027v.146l-1.095.219v.146l-.196.023c-.351.049-.693.137-1.038.218a8 8 0 0 1-.737.124l-.127.036c-.372.082-.764.069-1.145.081q-.238.008-.476.019c-.501.018-.974.022-1.464-.104-.169-.043-.169-.043-.438-.033v-.146l-.186-.021c-.287-.059-.528-.17-.786-.303l-.14-.069c-.339-.172-.339-.172-.421-.337h-.219v-.146l-.146-.073c-.771-.924-.623-2.083-.584-3.212h.146l-.073-.292h.146l.018-.256c.043-.345.174-.601.347-.898.207-.36.207-.36.365-.744h.146l.055-.151c.109-.256.242-.486.383-.725h.146l.018-.128c.071-.212.188-.299.347-.456q.23-.287.452-.581l.133-.148h.146v-.146c.118-.113.118-.113.274-.242.173-.143.315-.276.455-.452.145-.18.288-.31.471-.452l.195-.152.21-.161.22-.174c1.505-1.185 3.172-2.166 4.968-2.839q.141-.053.281-.108c2.371-.926 5.736-1.62 7.972-.054"/><path d="M16.496 3.796c.073.219.073.219-.032.432l-.406.663 1.387.073v.219l-.158.036c-1.074.209-1.074.209-1.918.83a3.7 3.7 0 0 0-.333.812c-.258-.086-.282-.143-.415-.369l-.097-.162-.071-.126a7.6 7.6 0 0 0-1.577.519l-.175.065-.146-.073c.274-.291.565-.518.894-.744.33-.204.33-.204.566-.497h-.146c-.219-.484-.219-.484-.219-.73l.27.039c.639.074 1.134.122 1.664-.285l.401-.337.219-.073v-.146zm-2.482 7.737.073.219c-.195.16-.341.233-.584.292l-.073.146c-.187.046-.187.046-.365.073.101-.249.189-.339.433-.447a3.4 3.4 0 0 0 .515-.283"/></svg>           
+            e-Devlet İle Giriş
+          </a>
+        </div>
+        <div class="flex items-center"> 
+          <div class="h-0.5 w-full bg-gray-200"></div>
+          <div class="px-5 text-center text-gray-500">veya</div>
+          <div class="h-0.5 w-full bg-gray-200"></div>
+        </div>
+        <div id="error" class="mt-2" style="display: none;"></div>
+        <div>
+          <label for="username" class="mb-2 block text-sm font-medium text-gray-900">Öğrenci / Sicil Numarası</label>
+          <input type="text" id="username" class="focus:ring-0 focus:border-black block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-xs font-medium text-gray-900" placeholder="••••••••••••••••" required="" autocomplete="on" />
+        </div>
+        <div>
+          <label for="password" class="mb-2 block text-sm font-medium text-gray-900">Parola</label>
+          <input type="password" id="password" class="focus:ring-0 focus:border-black block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-xs font-medium text-gray-900" placeholder="••••••••" required="" autocomplete="on" />
+        </div>
+        <div class="flex items-center justify-end">
+          <span data-modal-target="password-recovery-modal" data-modal-toggle="password-recovery-modal" class="text-primary-600 text-xs font-medium hover:underline cursor-pointer">Şifrenizi mi unuttunuz?</span>
+        </div>
+        <button type="submit" class="flex w-full rounded-lg bg-black px-5 py-2.5 items-center justify-center text-sm font-medium text-white hover:bg-black/80" id="login" onclick="Auth();">Giriş yap</button>
+        <div class="flex justify-center pt-5 text-center">
+          <span class="text-xs font-medium">© <?= date('Y'); ?> İstanbul Nişantaşı Üniversitesi Bilgi İşlem Daire Başkanlığı - Tüm Hakları Saklıdır.</span>
+        </div>
+      </form>
+    </div>
+
+    <div id="authSection">
+      <div class="flex items-center justify-center text-center w-full h-full bg-black/30">
+        <h1 class="mb-3 text-2xl font-extrabold leading-none tracking-tight text-white xl:text-5xl">İstanbul Nişantaşı Üniversitesi Bilgi Yönetim Sistemi</h1>
+      </div>
+    </div>
+  </div>
+</main>

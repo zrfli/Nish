@@ -1,0 +1,16 @@
+{
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "cssnano": "^7.0.1",
+    "flowbite-typography": "^1.0.3",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1"
+  },
+  "dependencies": {
+    "dompurify": "^3.0.9",
+    "flowbite": "^2.2.1",
+    "jquery": "^3.7.1",
+    "preline": "^2.0.3",
+    "socket.io": "^4.7.5"
+  }
+}
