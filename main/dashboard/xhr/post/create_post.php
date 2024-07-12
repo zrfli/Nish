@@ -10,7 +10,7 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/fix_image_orientation.php
 $dbClass = new misyDbInformation();
 //$logger = new MisyLogger($dbClass);	
 
-$errors = []; $data = []; $supportedFormats = ['webp', 'jpeg', 'png', 'jpg', 'gif'];  $contentValidLanguage = ['tr', 'en']; $contentValidType = ['news', 'events', 'research', 'announcements', 'achievements']; $contentSlug = null; $contentTitle = null; $contentCoverImage = null; $contentType = null; $contentLanguage = null; $contentHtmlMarkup = null;
+$errors = []; $data = []; $supportedFormats = ['webp', 'jpeg', 'png', 'jpg', 'gif']; $contentValidLanguage = ['tr', 'en']; $contentValidType = ['news', 'events', 'research', 'announcements', 'achievements']; $contentSlug = null; $contentTitle = null; $contentCoverImage = null; $contentType = null; $contentLanguage = null; $contentHtmlMarkup = null; $tempContentFiles = ['images' => [], 'files' => []]; $contentFile = ['picture' => [], 'files' => []];
 
 header("Content-type: application/json; charset=utf-8");
 
@@ -41,6 +41,46 @@ try {
         $data['statusCode'] = 406;
         $data['errors'] = $errors;
     } else {
+        if (isset($_FILES['albumImages'])) {
+            foreach ($_FILES['albumImages']['name'] as $key => $name) {
+                $tempFilePath = $_FILES['albumImages']['tmp_name'][$key];
+                $fileExtension = strtolower(pathinfo($_FILES['albumImages']['name'][$key], PATHINFO_EXTENSION));
+        
+                $uploadDir = 'uploads/post/' . date('Y') . '/' . date('m') . '/' . date('d') . '/album/';
+                
+                $albumImages = match ($fileExtension) {
+                    'gif' => $uploadDir . \Delight\Auth\Auth::createUuid() . '.gif',
+                    default => $uploadDir . \Delight\Auth\Auth::createUuid() . '.webp',
+                };
+                
+                $uploadedImagePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $albumImages;
+                
+                if (in_array($fileExtension, $supportedFormats)) {
+                    if (!is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir)) { mkdir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir, 0777, true); }
+    
+                    if (move_uploaded_file($tempFilePath, $uploadedImagePath)) {
+                        if ($fileExtension !== 'gif') {
+                            fixImageOrientation($uploadedImagePath);
+        
+                            $sourceImage = imagecreatefromstring(file_get_contents($uploadedImagePath));
+            
+                            if ($sourceImage !== false) {
+                                $resizedImage = imagecreatetruecolor(395, 263);
+            
+                                imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, 395, 263, imagesx($sourceImage), imagesy($sourceImage));
+                                imagejpeg($resizedImage, $uploadedImagePath);
+                
+                                imagedestroy($sourceImage);
+                                imagedestroy($resizedImage);
+
+                                array_push($tempContentFiles['images'], $albumImages);
+                            }
+                        }
+                    } //else { $data['status'] = false; $data['statusCode'] = 500; $data['message'] = 'album upload error'; }
+                } //else { $data['status'] = false; $data['statusCode'] = 400; $data['message'] = 'album type not supported'; }
+            }
+        }
+
         if (isset($_FILES['contentCoverImage'])) {
             $tempFilePath = $_FILES["contentCoverImage"]["tmp_name"];
     
@@ -78,13 +118,18 @@ try {
                 } else { $data['status'] = false; $data['statusCode'] = 500; $data['message'] = 'file upload error'; }
             } else { $data['status'] = false; $data['statusCode'] = 400; $data['message'] = 'file type not supported'; }
         } 
+        
+        if (isset($_FILES['albumImages'])) {
+            foreach ($tempContentFiles['images'] as $image) { $contentFile['picture'][] = ['url' => $image]; }
+        }
 
-        $insert_post = $db -> prepare('INSERT INTO `Ms_Posts` (`user_id`,`slug`,`post_title`,`post_text`,`post_type`,`cover_image`,`language`,`time`) VALUES (:userId,:contentSlug,:contentTitle,:contentHtmlMarkup,:contentType,:contentCoverImage,:contentLanguage,:contentTime);');
+        $insert_post = $db -> prepare('INSERT INTO `Ms_Posts` (`user_id`,`slug`,`post_title`,`post_text`,`post_type`,`post_file`,`cover_image`,`language`,`time`) VALUES (:userId,:contentSlug,:contentTitle,:contentHtmlMarkup,:contentType,:contentFile,:contentCoverImage,:contentLanguage,:contentTime);');
         $insert_post -> bindValue(':userId', $auth -> getUserId(), PDO::PARAM_INT);
         $insert_post -> bindValue(':contentSlug', $contentSlug, PDO::PARAM_STR);
         $insert_post -> bindValue(':contentTitle', $contentTitle, PDO::PARAM_STR);
         $insert_post -> bindValue(':contentHtmlMarkup', $contentHtmlMarkup, PDO::PARAM_STR);
         $insert_post -> bindValue(':contentType', $contentType, PDO::PARAM_STR);
+        $insert_post -> bindValue(':contentFile', json_encode($contentFile), PDO::PARAM_STR);
         $insert_post -> bindValue(':contentCoverImage', $contentCoverImage, PDO::PARAM_STR);
         $insert_post -> bindValue(':contentLanguage', $contentLanguage, PDO::PARAM_STR);
         $insert_post -> bindValue(':contentTime', time(), PDO::PARAM_INT);
@@ -93,7 +138,6 @@ try {
         
         if ($insert_post -> rowCount() > 0) { $data['status'] = 'success'; $data['statusCode'] = 200; } else { $data['status'] = false; $data['statusCode'] = 406; }
     }
-    
 } catch(PDOException $e) { echo $e; $data['status'] = false; $data['statusCode'] = 500; $data['message'] = 'unknown error!'; }
 
 $db = null;

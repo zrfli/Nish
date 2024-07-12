@@ -392,17 +392,85 @@ var paymentType;
 
 const maxFiles = 10;
 const maxFileSize = 5 * 1024 * 1024;
-const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg', 'image/webp'];
 let uploadedImages = [];
 let uploadedFiles = [];
 
-function createPost() {
-    $('body').prepend(`<div id="payment-modal" tabindex="-1" class="fixed pt-20 top-0 left-0 right-0 z-50 h-full w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 justify-center items-center flex backdrop-blur-sm" aria-modal="true" role="dialog">
-                            <div class="relative w-full max-w-md max-h-full" id="paymentPanel">
+let publishedPosts = [];
+
+function updateAndDisplayPosts(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['publishedPostsData']){
+            localStorage.setItem('publishedPostsData', JSON.stringify({ publishedPosts: data['publishedPostsData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
+
+            $.each(data['publishedPostsData'], function (key, value) {
+                publishedPosts.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
+                                            <div class="flex justify-between items-center rounded-t-xl border-b bg-gray-100 border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 px-2 py-2">
+                                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-300">#${value.id} - ${value.language}</span>
+                                            <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium border border-purple-500 bg-purple-100 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-300 text-purple-800 rounded">${value.type}</span>
+                                        </div>
+                                        <div class="p-3">
+                                            <div class="flex justify-center text-center flex-col items-center">
+                                                <p class="font-medium mt-1 text-gray-800 text-xs dark:text-gray-400">${value.time}</p>
+                                                <span class="font-semibold text-sm text-gray-800 dark:text-white">${value.title}</span>
+                                                <p class="mt-1 text-gray-800 text-xs dark:text-gray-400">${value.slug}</p>
+                                            </div>
+                                            <div class="flex justify-between mt-1">
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="contentDetails(this);">Gönderi Detayları ></span>
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="deleteContent(this);">Gönderiyi Sil ></span>
+                                                <a href="${value.slug}" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50">Gönderiyi Görüntüle ></a>
+                                            </div>
+                                        </div>
+                                    </div>`);
+            });
+
+            console.log(2);
+            $('#postsContent').html(publishedPosts.join(''));
+        }
+    }
+}
+
+function getPosts() {
+    var storedPublishedPosts = localStorage.getItem('publishedPostsData');
+    var parsedData;
+
+    if (storedPublishedPosts) {
+        try { parsedData = JSON.parse(storedPublishedPosts); } catch (e) { console.log(e); localStorage.removeItem('publishedPosts'); $.post("xhr/dashboard/post/published_posts").done(updateAndDisplayPosts); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {            
+            $.each(parsedData.publishedPosts, function (key, value) {
+                publishedPosts.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
+                                            <div class="flex justify-between items-center rounded-t-xl border-b bg-gray-100 border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 px-2 py-2">
+                                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-300">#${value.id} - ${value.language}</span>
+                                            <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium border border-purple-500 bg-purple-100 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-300 text-purple-800 rounded">${value.type}</span>
+                                        </div>
+                                        <div class="p-3">
+                                            <div class="flex justify-center text-center flex-col items-center">
+                                                <p class="font-medium mt-1 text-gray-800 text-xs dark:text-gray-400">${value.time}</p>
+                                                <span class="font-semibold text-sm text-gray-800 dark:text-white">${value.title}</span>
+                                                <p class="mt-1 text-gray-800 text-xs dark:text-gray-400">${value.slug}</p>
+                                            </div>
+                                            <div class="flex justify-between mt-1">
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="contentDetails(this);">Gönderi Detayları ></span>
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="deleteContent(this);">Gönderiyi Sil ></span>
+                                                <a href="${value.slug}" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50">Gönderiyi Görüntüle ></a>
+                                            </div>
+                                        </div>
+                                    </div>`);
+            });
+
+            $('#postsContent').html(publishedPosts.join(''));
+        } else { localStorage.removeItem('publishedPosts'); $.post("xhr/dashboard/post/published_posts").done(updateAndDisplayPosts); }
+    } else { $.post("xhr/dashboard/post/published_posts").done(updateAndDisplayPosts); }
+}
+
+function createContentPanel() {
+    $('body').prepend(`<div id="create-content-modal" tabindex="-1" class="fixed pt-20 top-0 left-0 right-0 z-50 h-full w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 justify-center items-center flex backdrop-blur-sm" aria-modal="true" role="dialog">
+                            <div class="relative w-full max-w-md max-h-full" id="contentPanel">
                                 <div class="rounded-xl shadow-2xl bg-white shadow-black/[.7]" >
                                     <div class="flex items-center justify-between p-4 border-b rounded-t">
                                         <h3 class="text-xl font-medium text-gray-900">İçerik Oluşturma Aracı</h3>
-                                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="payment-modal" onclick="$(\'#payment-modal\').remove();">
+                                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="create-content-modal" onclick="$(\'#create-content-modal\').remove();">
                                             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
                                             </svg>
@@ -425,10 +493,10 @@ function createPost() {
                                 </div>
                             </div>
                         </div>`);
-    getPostSchema();
+    getContentSchema();
 }
 
-function getPostSchema() {
+function getContentSchema() {
     var items = [];
 
     $.post("xhr/dashboard/post/post_schema", function() {})
@@ -448,13 +516,13 @@ function getPostSchema() {
             } 
         })
         .fail(function(data) {
-            $('#paymentContent').html(paymentError);        
+            $('#contentPanel').html(paymentError);        
         }
     )
 }
 
 function postMethod(type) {
-    $('#paymentPanel').removeClass('max-w-md').addClass('max-w-4xl');
+    $('#contentPanel').removeClass('max-w-md').addClass('max-w-4xl');
     $('#paymentSection').html(`<div class="text-center">
                                     <div role="status">
                                         <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
@@ -473,23 +541,23 @@ function postMethod(type) {
 
                 $('#paymentFooter').show();
                 $('#paymentSection').html(data['data']);
-            } else { getPostSchema(); }
+            } else { getContentSchema(); }
         })
         .fail(function(data) {
-            $('#paymentContent').html(paymentError);
+            $('#contentPanel').html(paymentError);
         }
     )
 }
 
 function paymentBack() {
     $('#paymentFooter').hide();
-    $('#paymentPanel').removeClass('max-w-4xl').addClass('max-w-md');
+    $('#contentPanel').removeClass('max-w-4xl').addClass('max-w-md');
     $('#paymentSection').html(`<div class="text-center">
                                     <div role="status">
                                         <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
                                     </div>
                                 </div>`);
-    getPostSchema();
+    getContentSchema();
 }
 
 function bankTransferInformation(key) {
@@ -616,7 +684,8 @@ function createContent() {
     formData.append('contentType', contentType);
     formData.append('contentLanguage', contentLanguage);
     formData.append('contentHtmlMarkup', contentHtmlMarkup);
-    formData.append('albumImages', uploadedFiles);
+
+    uploadedFiles.forEach((file, index) => { formData.append(`albumImages[]`, file); });
 
     $.ajax({
         url: "xhr/dashboard/post/create_post",
@@ -646,153 +715,6 @@ function createContent() {
 
     handledFile = '';
 }
-
-function abortUpload(key) {
-    if(key == 1){
-        paymentMethod(1);
-        $('#paymentBackBtn').attr('onclick', 'paymentBack();');
-    }
-
-    if (documentProcessXhr) { 
-        documentProcessXhr.abort(); 
-        documentProcessXhr = '';
-
-        if($('#paymentBackBtn').attr('onclick') == 'abortUpload(1);'){
-            $('#paymentBackBtn').attr('onclick', 'paymentMethod(1);');
-        }
-
-        $('#uploadingFilePanel').hide();
-        $('#fileActionPanel').hide();
-        $('#barTotal').text(0 + '%');
-        $('#barWidth').css('width', 0);
-        $('#documentPanel').show();
-    }
-}
-
-function calculateInstallments(principal, annualInterestRate, installments, installmentStatus) {
-    const selectElement = $("#installmentsSelect");
-    const discountedAmount = (principal * discountPercentage / 100).toFixed(2);
-
-    selectElement.append(`<option value="0">Tek Çekim: ${principal.toFixed(2) - discountedAmount}₺ ${discountPercentage > 0 ? ` (İndirim Oranı: ${discountPercentage}%)` : ''}</option>`);
-
-    if (installmentStatus === true) { 
-            installments.forEach(months => {
-                const monthlyInterestRate = annualInterestRate / 2 / 100;
-                const numerator = monthlyInterestRate * Math.pow(1 + monthlyInterestRate, months);
-                const denominator = Math.pow(1 + monthlyInterestRate, months) - 1;
-
-                const installmentAmount = principal * (numerator / denominator);
-                const totalPayment = installmentAmount * months;
-
-                selectElement.append(`<option value="${months}">${months} Taksit: ${installmentAmount.toFixed(2)} - Toplam Ödeme: ${totalPayment.toFixed(2)}₺</option>`);
-        });
-    }
-}
-
-function processCardDetails(cardNumber) {
-    return new Promise(function(resolve, reject) {
-        var numericCardNumber = parseInt(cardNumber, 10);
-        var cardIcons = '';
-
-        if (isNaN(numericCardNumber) || numericCardNumber.toString().length <= 14) {
-            $('#installmentsContent').remove(); $('#payBtn').remove(); $('#cardLogoContainer').html(null).hide();
-            return;
-        } 
-        
-        if (cardNumber === lastCardNumber || numericCardNumber.toString().length > 16) { return; }
-
-        $.post("api/v2/common-pay/bin/" + cardNumber.toString().slice(0, 6))
-            .done(function(data) {
-                if (data['status'] === 'success' && data['statusCode'] === 200) {
-                    if (!data.bankDetail) { reject("parameter error."); return; }
-
-                    if (data.bankDetail.cardProgramIcon) { cardIcons += `<img src="${data.bankDetail.cardProgramIcon}" class="h-full w-12" alt="" loading="lazy" decoding="async" />`; }
-
-                    if (data.bankDetail.cardBrandIcon) { cardIcons += `<img src="${data.bankDetail.cardBrandIcon}" class="h-full w-12" alt="" loading="lazy" decoding="async" />`; }
-
-                    $('#cardLogoContainer').html(cardIcons).show();
-
-                    if ($('#installmentsContent').length === 0) { 
-                        $('#cardDetailsContent').append(`<div id="installmentsContent" class="col-span-2">
-                                                            <label for="installmentsSelect" class="block mb-2 text-sm font-medium text-gray-900">Ödeme Seçenekleri</label>
-                                                            <select id="installmentsSelect" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-xs text-gray-900 focus:outline-none focus:ring-0 focus:border-black font-medium"></select>
-                                                        </div>`);
-                        $('#paymentSection').append(`<div class="flex justify-end mt-4" id="payBtn">
-                                                        <button type="button" class="text-white flex bg-black hover:bg-black/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center" onclick="payWithCard();">
-                                                        Şimdi öde
-                                                        </button>
-                                                    </div>`);
-
-                        $.getScript("assets/js/vpos.js")
-                            .done(function (script, textStatus) {
-                                console.log("Script loaded successfully");
-                            })
-                            .fail(function (jqxhr, settings, exception) {
-                                console.error("Error loading script:", exception);
-                        });
-                    } else { $("#installmentsSelect").empty(); }
-
-                    cardIcons = '';
-                    lastCardNumber = numericCardNumber;
-                    cardBrandCode = data.bankDetail.cardBrandCode;
-                    calculateInstallments(parseFloat(paymentAmount.replace(/[,.]/g, ''), 10), 2, [3, 6, 9], data.bankDetail.installment);
-                } else { reject("API isteği başarısız oldu."); }
-            })
-            .fail(function() {
-                reject("Post isteği başarısız oldu.");
-        });
-    });
-}
-
-function payWithCard(key) {
-    var cardHolderName = DOMPurify.sanitize($('#cardHolderName').val());
-    var cardNumber = DOMPurify.sanitize($('#cardNumber').val());
-    var cardExpMonth = DOMPurify.sanitize($('#cardExpMonth').val());
-    var cardExpYear = DOMPurify.sanitize($('#cardExpYear').val());
-    var cardCvv = DOMPurify.sanitize($('#cardCvv').val());
-    var installment = DOMPurify.sanitize($('#installmentsSelect').val());
-
-    if (installment >= 0 && cardHolderName.trim() !== '' && cardNumber.trim() !== '' && cardExpMonth.trim() !== '' && cardExpYear.trim() !== '' && cardCvv.trim() !== '' && cardNumber.length >= 15 && cardCvv.length >= 3) {
-        $('#paymentBackBtn').prop('disabled', true).hide();
-        $('#paymentSection').html(`<div class="text-center">
-                                        <div role="status">
-                                            <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
-                                        </div>
-                                    </div>`);
-
-        $.post("xhr/create_payment_request", { paymentType: 'credit_card', cardHolderName: cardHolderName, cardNumber: cardNumber, expMonth: cardExpMonth, expYear: cardExpYear, cardCvv: cardCvv, installment: installment })
-            .done(function(data) {
-                const processBankResponse = { 'garanti': garanti, 'akbank': akbank, 'finansbank': finansbank, 'halkbank': halkbank, 'teb': teb, 'isbank': isbank, 'sekerbank': sekerbank, 'yapikredi': yapikredi, 'albaraka': albaraka, 'ziraat': ziraat, 'denizbank': denizbank, 'kuveytpos': kuveytpos, 'hsbc': hsbc, 'vakifbank': vakifbank }[ data.clientKey ] || vakifbank;
-                
-                processBankResponse(data.paymentContent);
-            }
-        )
-    }
-}
-
-function payWithProvider(type) {
-    var provider = DOMPurify.sanitize(type).trim();
-    var paymentBackBtn = $('#paymentBackBtn').show();
-
-    if (provider !== '') {
-        paymentBackBtn.hide();
-
-        $.post("xhr/create_payment_request", { paymentType : provider })
-            .done(function(data) {
-                if (/^(http(s)?:\/\/|www\.)\S+/i.test(data.paymentContent)) {
-                    $.getScript("assets/js/vpos.js")
-    
-                    $('#paymentSection').html(`<iframe id="paymentIframe" class="w-full" style="height: 61rem;" scrolling="no" src="${data.paymentContent}"></iframe>`);
-                } else {
-                    paymentBackBtn.show();
-                    $('#paymentSection').text(data.paymentContent);
-                }
-            })
-            .fail(function(data) {
-                $('#paymentSection').html(paymentError);
-            });
-    }
-}
 <?php endif; ?>
 
 function initializePage() {
@@ -800,8 +722,8 @@ function initializePage() {
         case '/':
             getUserCredential();
         break;
-        case '/notes':
-            getLessonsNotes();
+        case '/dashboard/posts':
+            getPosts();
         break;
         case '/lessons':
             getLessons();
