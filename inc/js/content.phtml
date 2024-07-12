@@ -576,6 +576,8 @@ function serializePost(data){
     if (window.location.pathname == '/') { 
         if (posts[data.type]) { $('#'+data.type+'Content').html(posts[data.type].join('')); }
     } else { $('#'+params+'Content').html(posts[params].join('')); }
+
+    //if (params != '/' && posts[params].length < 6) { $('#loadMorePostContent').remove(); }
 } 
 
 function getPosts() {
