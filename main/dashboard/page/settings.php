@@ -12,8 +12,8 @@
                     <div>
                         <h3 class="mb-1 text-base font-semibold dark:text-white">Fotoğraf</h3>
                         <div id="pictureStatus" class="font-medium">
-                            <div class="mb-2 w-48 h-2 bg-gray-300 rounded-full animate-pulse"></div>
-                            <div class="w-24 h-2 bg-gray-300 rounded-full animate-pulse"></div>
+                            <div class="mb-2 w-48 h-2 bg-gray-300 dark:bg-neutral-800 rounded-full animate-pulse"></div>
+                            <div class="w-24 h-2 bg-gray-300 dark:bg-neutral-800 rounded-full animate-pulse"></div>
                         </div>
                     </div>
                 </div>

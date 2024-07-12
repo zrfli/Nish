@@ -1,5 +1,5 @@
 <?php
-if ($_SERVER['REQUEST_URI'] != '/xhr/dashboard/post/create_post'){ header('Location: /not-found'); exit(); }
+if ($_SERVER['REQUEST_URI'] != '/xhr/dashboard/post/create_post') { header('Location: /not-found'); exit(); }
 
 require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
@@ -15,13 +15,13 @@ $errors = []; $data = []; $supportedFormats = ['webp', 'jpeg', 'png', 'jpg', 'gi
 header("Content-type: application/json; charset=utf-8");
 
 try {	
-    $db = new \PDO($dbClass -> misyGetDb('mysql'), $dbClass -> getUser(), $dbClass -> getPassword());
+    $db = new \PDO($dbClass->misyGetDb('mysql'), $dbClass->getUser(), $dbClass->getPassword());
     $auth = new \Delight\Auth\Auth($db);
 
-    if (!$auth -> check()){ $errors['isLogged'] = false; }
+    if (!$auth->check()){ $errors['isLogged'] = false; }
     if ($_SERVER['REQUEST_METHOD'] != 'POST'){ $errors['method'] = 'method not accepted!'; }
     
-    if (empty($_POST['contentTitle']) OR empty($_POST['contentType']) OR empty($_POST['contentHtmlMarkup'])  OR empty($_POST['contentLanguage'])) { 
+    if (empty($_POST['contentTitle']) || empty($_POST['contentType']) || empty($_POST['contentHtmlMarkup']) || empty($_POST['contentLanguage'])) { 
         $errors['information'] = 'information is empty!';
     } else {
         $contentTitle = htmlspecialchars(trim($_POST['contentTitle']));
@@ -33,7 +33,7 @@ try {
 
     if (!in_array($contentType, $contentValidType)) { $errors['type'] = 'content type is not correct!'; }
     if (!in_array($contentLanguage, $contentValidLanguage)) { $errors['language'] = 'content language is not correct!'; }
-    if (!isset($_FILES['contentCoverImage']) AND ($contentType == 'news' OR $contentType == 'research' OR $contentType == 'achievements')) { $errors['coverImage'] = 'cover image is not correct!'; }
+    if (!isset($_FILES['contentCoverImage']) && ($contentType == 'news' || $contentType == 'research' || $contentType == 'achievements')) { $errors['coverImage'] = 'cover image is not correct!'; }
     if (empty($contentSlug)) { $errors['slug'] = 'slug is not correct!'; }
 
     if (!empty($errors)) {
@@ -56,13 +56,15 @@ try {
                 $uploadedImagePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $albumImages;
                 
                 if (in_array($fileExtension, $supportedFormats)) {
-                    if (!is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir)) { mkdir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir, 0777, true); }
+                    if (!is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir)) { 
+                        mkdir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir, 0777, true); 
+                    }
     
                     if (move_uploaded_file($tempFilePath, $uploadedImagePath)) {
                         if ($fileExtension !== 'gif') {
                             fixImageOrientation($uploadedImagePath);
         
-                            $sourceImage = imagecreatefromstring(file_get_contents($uploadedImagePath));
+                            @$sourceImage = imagecreatefromstring(file_get_contents($uploadedImagePath));
             
                             if ($sourceImage !== false) {
                                 $resizedImage = imagecreatetruecolor(395, 263);
@@ -96,14 +98,16 @@ try {
             
             $uploadedImagePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $contentCoverImage;
             
-            if (!is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir)) { mkdir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir, 0777, true); }
+            if (!is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir)) { 
+                mkdir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir, 0777, true); 
+            }
     
             if (in_array($fileExtension, $supportedFormats)) { 
                 if (move_uploaded_file($tempFilePath, $uploadedImagePath)) {
                     if ($fileExtension !== 'gif') {
                         fixImageOrientation($uploadedImagePath);
     
-                        $sourceImage = imagecreatefromstring(file_get_contents($uploadedImagePath));
+                        @$sourceImage = imagecreatefromstring(file_get_contents($uploadedImagePath));
         
                         if ($sourceImage !== false) {
                             $resizedImage = imagecreatetruecolor(395, 263);
@@ -120,11 +124,13 @@ try {
         } 
         
         if (isset($_FILES['albumImages'])) {
-            foreach ($tempContentFiles['images'] as $image) { $contentFile['picture'][] = ['url' => $image]; }
+            foreach ($tempContentFiles['images'] as $image) { 
+                $contentFile['picture'][] = ['url' => $image]; 
+            }
         }
 
         $insert_post = $db -> prepare('INSERT INTO `Ms_Posts` (`user_id`,`slug`,`post_title`,`post_text`,`post_type`,`post_file`,`cover_image`,`language`,`time`) VALUES (:userId,:contentSlug,:contentTitle,:contentHtmlMarkup,:contentType,:contentFile,:contentCoverImage,:contentLanguage,:contentTime);');
-        $insert_post -> bindValue(':userId', $auth -> getUserId(), PDO::PARAM_INT);
+        $insert_post -> bindValue(':userId', $auth->getUserId(), PDO::PARAM_INT);
         $insert_post -> bindValue(':contentSlug', $contentSlug, PDO::PARAM_STR);
         $insert_post -> bindValue(':contentTitle', $contentTitle, PDO::PARAM_STR);
         $insert_post -> bindValue(':contentHtmlMarkup', $contentHtmlMarkup, PDO::PARAM_STR);

@@ -1,9 +1,9 @@
-<?php if($_SERVER['REQUEST_URI'] != '/dashboard/posts') { header('Location: /not-found'); exit(); } require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/db.php'; if (!$auth -> isLoggedIn()) { header('Location: /login'); exit(); } require_once '../inc/head/content.phtml'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/includeAsset.php'; require_once '../inc/header/content.phtml'; require_once '../inc/sidebar/content.phtml'; ?>
+<?php if($_SERVER['REQUEST_URI'] != '/dashboard/pages') { header('Location: /not-found'); exit(); } require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/db.php'; if (!$auth -> isLoggedIn()) { header('Location: /login'); exit(); } require_once '../inc/head/content.phtml'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/includeAsset.php'; require_once '../inc/header/content.phtml'; require_once '../inc/sidebar/content.phtml'; ?>
 <div class="sm:ml-64 mt-28">
     <div class="flex items-center justify-between ml-4">
         <div>
-            <h3 class="text-xl font-semibold dark:text-white">Gönderiler</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Paylaşılan tüm Gönderiler.</p>
+            <h3 class="text-xl font-semibold dark:text-white">Sayfalar</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Oluşturulan tüm sayfalar.</p>
         </div>
         <div>
             <button class="text-white bg-black hover:bg-black/80 font-medium rounded-lg border border-gray-700 text-xs px-5 py-2.5 text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800 dark:border-neutral-700 mr-4" type="button" onclick="createContentPanel();">İçerik Oluştur</button>

@@ -1,6 +1,6 @@
 <script async src="node_modules/flowbite/dist/flowbite.min.js"></script>
 <script async type="text/javascript" src="node_modules/dompurify/dist/purify.min.js"></script>
-<!--<script src="node_modules/preline/dist/preline.js"></script>-->
+<script src="node_modules/preline/dist/preline.js"></script>
 <script async type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
 
 <?php if($_SERVER['REQUEST_URI'] == '/lessons') { ?>
@@ -17,10 +17,10 @@ function logOut() {
     )
 }
 
-<?php if($_SERVER['REQUEST_URI'] == '/dashboard/settings' || $_SERVER['REQUEST_URI'] == '/dashboard/posts') { ?>
+<?php if($_SERVER['REQUEST_URI'] == '/dashboard/settings' || $_SERVER['REQUEST_URI'] == '/dashboard/posts' || $_SERVER['REQUEST_URI'] == '/dashboard/pages') { ?>
 function setProgressToast(params) {
     var status = params;
-
+    
     if(status === 0) {
         $('body').append(`<div id="progress-toast" tabindex="-1" class="fixed left-0 right-0 top-0 z-50 flex h-full w-full items-end justify-center overflow-y-auto overflow-x-hidden p-4 md:inset-0" aria-modal="true" role="dialog">
                             <div class="relative max-h-full w-full max-w-md">
@@ -73,6 +73,50 @@ function setProgressToast(params) {
     }
 
     if(status > 0) { setTimeout(function() { $('#progress-toast').remove(); }, 1500); }
+}
+
+var morePostStartKey = 9;
+
+function loadMorePost() {
+    setProgressToast(0);
+
+    var params = DOMPurify.sanitize(window.location.pathname.split('/').pop());
+    var loadMoreBtn = $('#loadMorePostContent');
+
+    $.post("xhr/dashboard/post/load_more_content", { params: params, key: morePostStartKey })
+        .done(function(data) {
+            if (data['status'] === 'success' && data['statusCode'] === 200) { 
+                if (data['posts']) { 
+                    $.each(data.posts, function (key, value) { 
+                    $('#publishedContent').append(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
+                                            <div class="flex justify-between items-center rounded-t-xl border-b bg-gray-100 border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 px-2 py-2">
+                                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-300">#${value.id} - ${value.language}</span>
+                                            <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium border border-purple-500 bg-purple-100 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-300 text-purple-800 rounded">${value.type}</span>
+                                        </div>
+                                        <div class="p-3">
+                                            <div class="flex justify-center text-center flex-col items-center">
+                                                <p class="font-medium mt-1 text-gray-800 text-xs dark:text-gray-400">${value.time}</p>
+                                                <span class="font-semibold text-sm text-gray-800 dark:text-white">${value.title}</span>
+                                                <p class="mt-1 text-gray-800 text-xs dark:text-gray-400">${value.slug}</p>
+                                            </div>
+                                            <div class="flex justify-between mt-1">
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="contentDetails(this);">Gönderi Detayları ></span>
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="deleteContent(this);">Gönderiyi Sil ></span>
+                                                <a href="${value.slug}" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50">Gönderiyi Görüntüle ></a>
+                                            </div>
+                                        </div>
+                                    </div>`);
+                    }); 
+                    
+                    morePostStartKey += data.posts.length; 
+                    
+                    if (data.posts.length < 6) { loadMoreBtn.remove(); }
+
+                    setProgressToast(1); 
+                } else { setProgressToast(2); }
+            } else { loadMoreBtn.remove(); setProgressToast(4); }
+        }) .fail(function(data) { setProgressToast(2); }
+    );
 }
 <?php } ?>
 
@@ -374,7 +418,7 @@ function getDigitalCard() {
 }
 <?php } ?>
 
-<?php  if($_SERVER['REQUEST_URI'] == '/dashboard/posts'): ?>
+<?php  if($_SERVER['REQUEST_URI'] == '/dashboard/posts' || $_SERVER['REQUEST_URI'] == '/dashboard/pages'): ?>
 const paymentError = `<div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-gray-600" role="alert">
                         <p class="text-sm text-yellow-600 text-center">İşlem sırasında bir hata oluştu. Lütfen tekrar deneyiniz.</p>
                     </div>`;
@@ -396,15 +440,15 @@ const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg', 
 let uploadedImages = [];
 let uploadedFiles = [];
 
-let publishedPosts = [];
+let storedContentData = [];
 
-function updateAndDisplayPosts(data) {
+function updateAndDisplayPages(data) {
     if (data['status'] === 'success' && data['statusCode'] === 200) {
-        if (data['publishedPostsData']){
-            localStorage.setItem('publishedPostsData', JSON.stringify({ publishedPosts: data['publishedPostsData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
+        if (data['createdPagesData']){
+            localStorage.setItem('createdPagesData', JSON.stringify({ createdPages: data['createdPagesData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
 
-            $.each(data['publishedPostsData'], function (key, value) {
-                publishedPosts.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
+            $.each(data['createdPagesData'], function (key, value) {
+                storedContentData.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
                                             <div class="flex justify-between items-center rounded-t-xl border-b bg-gray-100 border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 px-2 py-2">
                                             <span class="text-sm font-semibold text-gray-800 dark:text-gray-300">#${value.id} - ${value.language}</span>
                                             <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium border border-purple-500 bg-purple-100 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-300 text-purple-800 rounded">${value.type}</span>
@@ -424,8 +468,72 @@ function updateAndDisplayPosts(data) {
                                     </div>`);
             });
 
-            console.log(2);
-            $('#postsContent').html(publishedPosts.join(''));
+            $('#publishedContent').html(storedContentData.join(''));
+        }
+    }
+}
+
+function getPages() {
+    var storedCreatedPages = localStorage.getItem('createdPagesData');
+    var parsedData;
+
+    if (storedCreatedPages) {
+        try { parsedData = JSON.parse(storedCreatedPages); } catch (e) { console.log(e); localStorage.removeItem('createdPagesData'); $.post("xhr/dashboard/page/created_pages").done(updateAndDisplayPages); return; }
+
+        if (new Date() <= new Date(parsedData.expirationDate)) {            
+            $.each(parsedData.createdPages, function (key, value) {
+                storedContentData.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
+                                            <div class="flex justify-between items-center rounded-t-xl border-b bg-gray-100 border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 px-2 py-2">
+                                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-300">#${value.id} - ${value.language}</span>
+                                            <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium border border-purple-500 bg-purple-100 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-300 text-purple-800 rounded">${value.type}</span>
+                                        </div>
+                                        <div class="p-3">
+                                            <div class="flex justify-center text-center flex-col items-center">
+                                                <p class="font-medium mt-1 text-gray-800 text-xs dark:text-gray-400">${value.time}</p>
+                                                <span class="font-semibold text-sm text-gray-800 dark:text-white">${value.title}</span>
+                                                <p class="mt-1 text-gray-800 text-xs dark:text-gray-400">${value.slug}</p>
+                                            </div>
+                                            <div class="flex justify-between mt-1">
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="contentDetails(this);">Sayfa Detayları ></span>
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="deleteContent(this);">Sayfayı Sil ></span>
+                                                <a href="${value.slug}" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50">Sayfayı Görüntüle ></a>
+                                            </div>
+                                        </div>
+                                    </div>`);
+            });
+
+            $('#publishedContent').html(storedContentData.join(''));
+        } else { localStorage.removeItem('createdPages'); $.post("xhr/dashboard/page/created_pages").done(updateAndDisplayPages); }
+    } else { $.post("xhr/dashboard/page/created_pages").done(updateAndDisplayPages); }
+}
+
+function updateAndDisplayPosts(data) {
+    if (data['status'] === 'success' && data['statusCode'] === 200) {
+        if (data['publishedPostsData']){
+            localStorage.setItem('publishedPostsData', JSON.stringify({ publishedPosts: data['publishedPostsData'], expirationDate: new Date().getTime() + 24 * 60 * 60 * 3100 }));
+
+            $.each(data['publishedPostsData'], function (key, value) {
+                storedContentData.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
+                                            <div class="flex justify-between items-center rounded-t-xl border-b bg-gray-100 border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 px-2 py-2">
+                                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-300">#${value.id} - ${value.language}</span>
+                                            <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium border border-purple-500 bg-purple-100 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-300 text-purple-800 rounded">${value.type}</span>
+                                        </div>
+                                        <div class="p-3">
+                                            <div class="flex justify-center text-center flex-col items-center">
+                                                <p class="font-medium mt-1 text-gray-800 text-xs dark:text-gray-400">${value.time}</p>
+                                                <span class="font-semibold text-sm text-gray-800 dark:text-white">${value.title}</span>
+                                                <p class="mt-1 text-gray-800 text-xs dark:text-gray-400">${value.slug}</p>
+                                            </div>
+                                            <div class="flex justify-between mt-1">
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="contentDetails(this);">Sayfa Detayları ></span>
+                                                <span postId="${value.id}" title="${value.title}" slug="${value.slug}" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50" onclick="deleteContent(this);">Sayfayı Sil ></span>
+                                                <a href="${value.slug}" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex cursor-pointer items-center gap-x-1 rounded-lg border border-transparent text-xs font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-500 dark:hover:text-blue-600 disabled:pointer-events-none disabled:opacity-50">Sayfayı Görüntüle ></a>
+                                            </div>
+                                        </div>
+                                    </div>`);
+            });
+
+            $('#publishedContent').html(storedContentData.join(''));
         }
     }
 }
@@ -439,7 +547,7 @@ function getPosts() {
 
         if (new Date() <= new Date(parsedData.expirationDate)) {            
             $.each(parsedData.publishedPosts, function (key, value) {
-                publishedPosts.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
+                storedContentData.push(`<div class="flex flex-col rounded-xl bg-white dark:bg-black dark:border-neutral-700 shadow-sm border">
                                             <div class="flex justify-between items-center rounded-t-xl border-b bg-gray-100 border-gray-200 dark:border-neutral-700 dark:bg-neutral-800 px-2 py-2">
                                             <span class="text-sm font-semibold text-gray-800 dark:text-gray-300">#${value.id} - ${value.language}</span>
                                             <span class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium border border-purple-500 bg-purple-100 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-300 text-purple-800 rounded">${value.type}</span>
@@ -459,7 +567,7 @@ function getPosts() {
                                     </div>`);
             });
 
-            $('#postsContent').html(publishedPosts.join(''));
+            $('#publishedContent').html(storedContentData.join(''));
         } else { localStorage.removeItem('publishedPosts'); $.post("xhr/dashboard/post/published_posts").done(updateAndDisplayPosts); }
     } else { $.post("xhr/dashboard/post/published_posts").done(updateAndDisplayPosts); }
 }
@@ -700,9 +808,11 @@ function createContent() {
                 $('#contentCoverImage').val('');
                 $('#contentType').val('');
                 $('#coverImageInput').val('');
+                $('#albumInput').val();
 
                 tinymce.activeEditor.setContent('');
                 localStorage.clear('posts');
+                localStorage.clear('publishedPostsData');
                 return;
             }
             
@@ -724,9 +834,9 @@ function initializePage() {
         break;
         case '/dashboard/posts':
             getPosts();
-        break;
-        case '/lessons':
-            getLessons();
+            break;
+        case '/dashboard/pages':
+            getPages();
             break;
         case '/periods':
             getPeriods();
