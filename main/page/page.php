@@ -12,9 +12,11 @@ use Phpfastcache\Helper\Psr16Adapter;
 
 $Psr16Adapter = new Psr16Adapter('Files');
 
-require_once $_SERVER['DOCUMENT_ROOT'].'/src/config.php'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/post/get_post.php'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/format_date_time.php'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/manipulate_the_element.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/config.php'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/format_date_time.php'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/manipulate_the_element.php';
 
 if (!$Psr16Adapter -> has($slug)) {
+    require_once $_SERVER['DOCUMENT_ROOT'].'/src/post/get_post.php'; 
+    
     $element = getPost(['params' => $params, 'slug' => $slug]);
 
     if (!$element['status'] || $element['status'] !== 200) { header('Location: /not-found'); exit(); } else { $Psr16Adapter -> set($slug, $element, 120); }

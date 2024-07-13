@@ -42,7 +42,7 @@
             </div>
         </div>
     </div>
-    <div id="loadMorePostContent" class="flex justify-center mt-5">
+    <div id="loadMorePostContent" class="flex justify-center mt-5 mb-5">
         <button class="border border-gray-400 dark:border-neutral-700 text-white bg-black hover:bg-black/80 font-medium rounded-lg text-xs w-full max-w-sm py-2.5 text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800" onclick="loadMorePost();">Daha fazla yükle</button>
     </div>
     <!-- End Pages Section -->
