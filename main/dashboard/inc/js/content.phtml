@@ -640,9 +640,9 @@ function postMethod(type) {
     $.post("xhr/dashboard/post/post_method", { postMethod: type })
         .done(function(data) {
             if (data['status'] === 'success' && data['statusCode'] === 200) {
-                if (type === 'bank_transfer') {
+                if (type === 'create_page') {
                     bankTransferInformationJson = data['bankTransferInformation'];
-                    if ($('#paymentBackBtn').attr('onclick') === 'postMethod("bank_transfer");') {
+                    if ($('#paymentBackBtn').attr('onclick') === 'postMethod("create_page");') {
                         $('#paymentBackBtn').attr('onclick', 'paymentBack();');
                     }
                 } 
@@ -673,7 +673,7 @@ function bankTransferInformation(key) {
    
     $('#transferredBankName').text(bankTransferInformationJson[key]['name']);
     $('#transferredBankIban').text(bankTransferInformationJson[key]['iban']);
-    $('#paymentBackBtn').attr('onclick', 'postMethod("bank_transfer");');
+    $('#paymentBackBtn').attr('onclick', 'postMethod("create_page");');
     $('#bankPanel').remove();
     $('#actionMessage').remove();
     $('#paymentDetailsTable').show();

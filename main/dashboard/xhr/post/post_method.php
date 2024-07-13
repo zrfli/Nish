@@ -34,8 +34,8 @@ try {
         $data['token'] = \Delight\Auth\Auth::createRandomString(24); 
         $data['userId'] = \Delight\Auth\Auth::createUuid();
 
-        if($postMethod == 'bank_transfer'){
-          $data['data'] = '<h2 class="mb-2 text-lg font-medium">Havale / Eft</h2>
+        if($postMethod == 'create_page'){
+          $data['data'] = '<h2 class="mb-2 text-lg font-medium">Sayfa Oluştur</h2>
                             <div class="text-sm text-gray-600">
                               <p><span class="text-red-400">**</span>Açıklama bölümüne öğrenci adı, soyadı, okul numarası veya TC kimlik numarası yazılmalıdır.</p>
                               <p><span class="text-red-400">**</span>Ödeme sonrasında dekontların sisteme yüklenip onaya gönderilmesi gereklidir.</p>
@@ -129,7 +129,7 @@ try {
           $data['bankTransferInformation'][3]['name'] = 'Türk Ekonomi Bankası';
           $data['bankTransferInformation'][3]['branch'] = null;
           $data['bankTransferInformation'][3]['iban'] = 'TR70 0003 2000 0000 0015 9636 00';
-        } else if($postMethod == 'credit_card') {
+        } else if($postMethod == 'create_content') {
           $data['data'] = '<script type="text/javascript" src="assets/dashboard/tinymce/tinymce.min.js"></script>
                             <script>
                               const post_image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
@@ -187,7 +187,7 @@ try {
                                 images_upload_handler: post_image_upload_handler
                               });
                             </script>
-                            <h2 class="text-lg font-medium mb-2">Gönderi / Paylaşım</h2>
+                            <h2 class="text-lg font-medium mb-2">Gönderi Oluştur</h2>
                             <div id="cardDetailsContent" class="grid gap-2 mt-3 grid-cols-1 items-center">
                                 <div class="grid gap-2 grid-cols-2">
                                     <div class="col-span-2">
