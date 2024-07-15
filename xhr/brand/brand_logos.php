@@ -1,10 +1,7 @@
 <?php
-if($_SERVER['REQUEST_URI'] != '/xhr/brand/brand_logos'){ header('Location: /not-found'); exit(); }
+if ($_SERVER['REQUEST_URI'] != '/xhr/brand/brand_logos'){ header('Location: /not-found'); exit(); }
 
-require_once '../../src/database/config.php';
-//require_once '../../src/logger/logger.php';
-
-if(isset($_COOKIE['lang'])){ require_once('../../src/language/'.strip_tags($_COOKIE['lang']).'.php'); } else { require_once('../../src/language/turkish.php'); }
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
 
 $dbClass = new misyDbInformation();
 //$logger = new MisyLogger($dbClass);	

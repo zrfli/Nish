@@ -10,17 +10,19 @@
 
 if ($_SERVER['REQUEST_URI'] != '/') { header('Location: /not-found'); exit(); }
 
-require_once 'src/modules/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/modules/config.php';
 
-require_once 'inc/head/content.phtml';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/languageController.php';
 
-require_once 'src/system/errorHandler.php';
-require_once 'src/functions/includeAsset.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/inc/head/content.phtml';
+
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/system/errorHandler.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/includeAsset.php';
 
 //if (checkModuleStatus('indexBase') === false) {
-    require_once 'inc/layouts/header/content.phtml'; 
-    require_once 'inc/index_base/content.phtml';
-    require_once 'inc/layouts/footer/content.phtml';
+    require_once $_SERVER['DOCUMENT_ROOT'].'/inc/layouts/header/content.phtml'; 
+    require_once $_SERVER['DOCUMENT_ROOT'].'/inc/index_base/content.phtml';
+    require_once $_SERVER['DOCUMENT_ROOT'].'/inc/layouts/footer/content.phtml';
 //} else {  }
 
-require_once 'inc/js/content.phtml';
+require_once $_SERVER['DOCUMENT_ROOT'].'/inc/js/content.phtml';

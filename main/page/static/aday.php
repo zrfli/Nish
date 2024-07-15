@@ -1,4 +1,4 @@
-<?php if($_SERVER['REQUEST_URI'] != '/aday'){ header('Location: /not-found'); exit(); } require_once $_SERVER['DOCUMENT_ROOT'].'/inc/head/content.phtml'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/includeAsset.php'; require_once $_SERVER['DOCUMENT_ROOT'].'/inc/layouts/header/content.phtml'; ?>
+<?php if($_SERVER['REQUEST_URI'] != '/aday') { header('Location: /not-found'); exit(); } require_once $_SERVER['DOCUMENT_ROOT'].'/inc/head/content.phtml'; require_once $_SERVER['DOCUMENT_ROOT'].'/src/functions/includeAsset.php'; require_once $_SERVER['DOCUMENT_ROOT'].'/inc/layouts/header/content.phtml'; ?>
 <main class="mt-32 mb-16 min-h-96">
     <div class="mx-auto max-w-screen-xl p-4">
         <div class="mb-8 grid items-center gap-8 lg:mb-16 lg:grid-cols-9 lg:gap-9">

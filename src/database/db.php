@@ -11,9 +11,9 @@ if (session_status() == PHP_SESSION_NONE) { session_start(); ob_start(); }
 
 if ($_SERVER['REQUEST_URI'] == '/src/database/db.php') { header('Location: /'); exit(); } 
 
-require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
-require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/language.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/languageController.php';
 //require_once $_SERVER['DOCUMENT_ROOT'].'/src/logger/logger.php';
 
 if (isset($_COOKIE['lang']) && in_array($_COOKIE['lang'], $langs)) {

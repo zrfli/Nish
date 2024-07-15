@@ -1,8 +1,8 @@
 <?php
-if($_SERVER['REQUEST_URI'] != '/xhr/application/send_application'){ header('Location: /not-found'); exit(); }
+if ($_SERVER['REQUEST_URI'] != '/xhr/application/send_application'){ header('Location: /not-found'); exit(); }
 
-require_once '../../src/config.php';
-require_once '../../src/database/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
 //require_once '../../src/logger/logger.php';
 
 $dbClass = new misyDbInformation();

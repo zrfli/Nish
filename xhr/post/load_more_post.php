@@ -1,11 +1,10 @@
 <?php
 if ($_SERVER['REQUEST_URI'] != '/xhr/post/load_more_post'){ header('Location: /not-found'); exit(); }
 
-require_once '../../src/language/language.php';
-require_once '../../src/config.php';
-require_once '../../src/database/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/languageController.php';
 //require_once '../../src/logger/logger.php';
-if (isset($_COOKIE['lang'])){ require_once('../../src/language/'.strip_tags($_COOKIE['lang']).'.php'); } else { require_once('../../src/language/turkish.php'); }
 
 $dbClass = new misyDbInformation();
 //$logger = new MisyLogger($dbClass);	

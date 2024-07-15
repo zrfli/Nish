@@ -1,6 +1,6 @@
 <?php
 #Countrys
-$misy['country'] = array(
+$misy['country'] = [
 	null => 'Ülke seç',
     'country' => 'Ülke',
 	'tr' => 'Türkiye',
@@ -15,52 +15,52 @@ $misy['country'] = array(
 	'es' => 'Spain',
 	'ru' => 'Russia',
 	'ar' => 'United Arab Emirates',
-);
+];
 
 #Relationship
-$misy['relationship'] = array(
+$misy['relationship'] = [
     '1' => 'Bekar',
     '2' => 'İlişkisi var',
     '3' => 'Evli',
     '4' => 'Nişanlı'
-);
+];
 
 #Pages
-$misy['pages'] = array(
+$misy['pages'] = [
 	'page' => 'Sayfa',
     'follow' => 'Takip Et',
 	'unFollow' => 'Takipten Çık',
     'about' => 'Hakkında',
     'like' => 'Beğeni',
 	'suggestedPages' => 'Önerilen Sayfalar'
-);
+];
 
 #Pages
-$misy['wallet'] = array(
-);
+$misy['wallet'] = [
+];
 
 #Groups
-$misy['groups'] = array(
+$misy['groups'] = [
 	'group' => 'Grup',
     'join' => 'Katıl',
     'left' => 'Gruptan Ayrıl',
     'about' => 'Hakkında',
     'member' => 'Üye',
 	'suggestedGroups' => 'Önerilen Gruplar',
-);
+];
 
 #Feed
-$misy['createPost'] = array(
+$misy['createPost'] = [
 	'mind' => 'Aklında ne var?',
     'picture_video' => 'Fotograf/Video',
     'mention' => 'Arkadaşlarını Etiketle',
     'emoji' => 'Emoji',
 	'create' => 'Gönderi Oluştur',
 	'characterLimit' => 'Karakter limiti aşıldı',
-);
+];
 
 #Checkout
-$misy['checkout'] = array(
+$misy['checkout'] = [
     'paymentPage' => 'Ödeme Sayfası',
     'paymentSuccessMessage' => '<h3 class="md:text-2xl text-base text-gray-900 font-medium text-center">Ödeme başarılı! 🥳🎉</h3><p class="text-gray-600 my-2">Güvenli çevrimiçi ödemenizi tamamladığınız için teşekkür ederiz.</p><p class="text-gray-600 my-2">Kayıtlı e-posta adresinize elektronik fatura gönderilmiştir.</p>',
     'paymentFailMessage' => '<h3 class="md:text-2xl text-base text-gray-900 font-medium text-center">Ödeme başarısız! 😭💔</h3><p class="text-gray-600 my-2">Ödeme işlemi sırasında bir hata ile karşılaşıldı.</p>',
@@ -82,10 +82,10 @@ $misy['checkout'] = array(
                         <p class="text-sm-mt-2">Yaşadığınız her hangi bir sorunda sorununuzu mcd@genclikotobusu.com adresine mail atarak bildiriniz.</p>
                         <p class="text-sm mt-2">Satın almış olduğunuz Genç Kartların faturaları e fatura olup mail adresinize gönderilmektedir.</p>
                         <p class="text-sm mt-2">Satın Al Butonuna bastığınız zaman tüm satın alma koşulları ve şartlarını kabul etmiş sayılırsınız.</p>',
-);
+];
 
 #Months
-/*$wo['months'] = array(
+/*$wo['months'] = [
     '1' => 'Ocak',
     '2' => 'Şubat',
     '3' => 'Mart',
@@ -98,10 +98,10 @@ $misy['checkout'] = array(
     '10' => 'Ekim',
     '11' => 'Kasım',
     '12' => 'Aralık'
-);*/
+];*/
 
 #Time
-$misy['time'] = array(
+$misy['time'] = [
 	'second' => 'saniye',
     'year' => 'yıl',
     'month' => 'ay',
@@ -109,30 +109,30 @@ $misy['time'] = array(
     'minute' => 'dakika',
     'day' => 'gün',
 	'ago' => 'önce'
-);
+];
 
 #General
-$misy['general'] = array(
+$misy['general'] = [
     'siteName' => 'Misy',
 	'goCard' => 'Go Genç Kart'
 
-);
+];
 
 #Gender
-$misy['gender'] = array(
+$misy['gender'] = [
     '0' => 'Erkek',
 	'1' => 'Kadın',
-);
+];
 
 #Bar
-$misy['bar'] = array(
+$misy['bar'] = [
     'loading' => 'Yükleniyor..',
     'load_more' => 'Daha fazla görüntüle',
 	'seeReplies' => 'Yanıtları gör',
-);
+];
 
 #Profile
-$misy['profile'] = array(
+$misy['profile'] = [
     'idenity' => 'T.C. Kimlik Numarası',
     'name' => 'Adı',
     'surname' => 'Soyadı',
@@ -143,10 +143,10 @@ $misy['profile'] = array(
     'username' => 'Kullanıcı Adı',
     'email' => 'E-posta',
     'city' => 'Şehir',
-);
+];
 
 #Post
-$misy['post'] = array(
+$misy['post'] = [
 	'like' => 'Beğen',
     'add_comment' => 'Yorum Yap',
     'comment_input' => 'Yorum yaz',
@@ -161,22 +161,22 @@ $misy['post'] = array(
     'comment_off' => 'Yorumları Kapat',
     'statics' => 'İstatistikler',
 	'sharing' => 'Paylaşılıyor..',
-);
+];
 
 #Post Privacy
-$misy['postPrivacy'] = array(
+$misy['postPrivacy'] = [
 	'everyone' => 'Herkes',
     'onlyMe' => 'Sadece Ben'
-);
+];
 
 #Notification
-$misy['notification'] = array(
+$misy['notification'] = [
     'notification_liked' => 'Gönderini beğendi.',
 	'notification_comment' => 'Gönderine yorum yaptı.'
-);
+];
 
 #Messages
-$misy['message'] = array(
+$misy['message'] = [
     'change_success' => '<div class="flex p-4 mb-4 bg-green-100 rounded-lg text-sm font-medium text-green-700">Hesap bilgileri başarıyla güncellendi.</div>',
     'changeSuccessPassword' => 'Hesap bilgileri başarıyla güncellendi.',
     'mailSuccess' => '<div class="flex p-4 bg-green-100 rounded-lg text-sm font-medium text-green-700">E-posta başarıyla gönderildi.</div>',
@@ -184,10 +184,10 @@ $misy['message'] = array(
 	'mailError' => '<div class="flex p-4 bg-red-100 rounded-lg text-sm font-medium text-red-700">E-posta gönderilirken bir hata ile karşılaşıldı.</div>',
 	'mailTooManyRequest' => '<div class="flex p-4 bg-red-100 rounded-lg text-sm font-medium text-red-700">Çok fazla istek gönderildi.</div>',
     'contentNotFound' => 'İçerik bulunamadı!',
-);
+];
 
 #Applications
-$misy['applications'] = array(
+$misy['applications'] = [
     'note' => 'Dikkat 📌',
     'success' => 'Tebrikler! 🥳🎉',
     'waiting' => 'Onay Bekliyor! 🕐',
@@ -209,23 +209,23 @@ $misy['applications'] = array(
     'videoApproved' => 'Tebrikler Gençlik Otobüsü Video Başvurunuz Onaylandı. Aşağıdaki butona tıklayak süreç ile ilgili bilgi edinebilirsiniz.',
     'videoWaiting' => 'Gençlik Otobüsü Video Başvurunuz onay aşamasındadır. Süreçle ilgili web sitemizi takipte kalınız.',
     'tgoNot' => '<p class="text-gray-600 my-2">İlgili aşamaya Türkiye Gençlik Buluşması na katılım sağlamış kişiler devam edebilir.</p>',
-);
+];
 
 #Settigs
-$misy['settings'] = array(
+$misy['settings'] = [
     'settings' => 'Ayarlar',
 	'citys' => 'Şehirler',
     'newPassword' => 'Yeni Şifre',
 	'passwordReset' => 'Şifre Sıfırlama',
-);
+];
 
 #Announcement
-$misy['announcement'] = array(
+$misy['announcement'] = [
 	'home_direct' => 'Aşağıdaki butonları kullanarak ilgili bölümlere ulaşabilirsiniz.',
-);
+];
 
 #Action
-$misy['action'] = array(
+$misy['action'] = [
     'send' => 'Gönder',
 	'next' => 'Devam Et',
     'details' => 'Detaylar',
@@ -275,10 +275,10 @@ $misy['action'] = array(
 	'youtubeBottomText' => 'Gençlik Otobüsü Youtube kanalının içerikleri.',
     'deleteAccountMessage' => 'Gençlik Dünyası hesabınızı kalıcı olarak sildiğiniz anda profilinizle birlikte mesaj kutunuzda ki tüm mesajlarda silinir. Ancak Gençlik Dünyası profilinizden başka bir kullanıcı hesabına gönderdiğiniz ve kullanıcının mesaj kutusunda hala saklı duran mesajlarınız silinmeyecektir. Mesajlarınızın silinmesi için mesaj gönderdiğiniz kullanıcının mesajlarını silmesi gerekmektedir. Aksi halde tek taraflı mesaj silinmesi veya profilin kapatılması mesajları tamamen silmemektedir. Hesabın silinmesi durumunda etkiletişim sağladığınız tüm içeriklerde "Gençlik Dünyası Kullanıcısı" olarak adlandırılacaksınız ve hesabınıza ait tüm veriler KVKK kapsamında işlenecektir.',
     'mail' => '<p class="text-gray-600 my-2">Bunun bir hata olduğunu düşünüyorsanız <a href="mailto:mcd@genclikotobusu.com" class="text-blue-400">mcd@genclikotobusu.com</a> adresiyle iletişime geçiniz.</p>',
-);
+];
 
 #Left Bar
-$misy['left_bar'] = array(
+$misy['left_bar'] = [
     'home' => 'Ana Sayfa',
 	'pages' => 'Sayfalar',
 	'groups' => 'Gruplar',
@@ -292,10 +292,10 @@ $misy['left_bar'] = array(
     'fundraiser' => 'Bağış',
     'more' => 'Daha fazla göster',
     'less' => 'Daha az göster'
-);
+];
 
 #Error Messages
-$misy['error'] = array(
+$misy['error'] = [
     'general_error' => '<div class="flex p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg justify-center">İçerik yüklenirken bir hata ile karşılaşıldı!</div>',
     'invalid_mail' => '<div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg text-center">Geçersiz e-posta adresi veya şifre!</div>',
 	'InvalidMailPassword' => 'Geçersiz e-posta adresi veya şifre.',
@@ -315,10 +315,10 @@ $misy['error'] = array(
 	'shortUsername' => 'Kullanıcı adı en az 3 karakter uzunluğunda olmalıdır!',
 	'usernameAlerdyExists' => 'kullanıcı adı kullanılamaz!',
 	'usernameIsAvailable' => 'kullanıcı adı kullanılabilir!',
-);
+];
 
 #Auth Form
-$misy['auth'] = array(
+$misy['auth'] = [
     'login' => 'Giriş Yap',
 	'cookie' => 'Bu web sitesi, web sitemizde en iyi deneyimi yaşamanızı sağlamak için çerezleri kullanır.',
     'register' => 'Kayıt Ol',
@@ -338,4 +338,4 @@ $misy['auth'] = array(
 	'privacy_message9' => 'kabul etmiş olursunuz.',
     'signup_message0' => 'Üye olamk',
 	'signup_message1' => 'Hızlı ve kolaydır!',
-);
+];

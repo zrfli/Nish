@@ -1,14 +1,10 @@
 <?php
-if($_SERVER['REQUEST_URI'] != '/xhr/program/program_list') { header('Location: /not-found'); exit(); }
+if ($_SERVER['REQUEST_URI'] != '/xhr/program/program_list') { header('Location: /not-found'); exit(); }
 
-require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
-require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/language.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
-require_once $_SERVER['DOCUMENT_ROOT'].'/src/modules/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/languageController.php';
 
 use Phpfastcache\Helper\Psr16Adapter;
-
-if(isset($_COOKIE['lang'])){ require_once('../../src/language/'.strip_tags($_COOKIE['lang']).'.php'); } else { require_once('../../src/language/turkish.php'); }
 
 $dbClass = new misyDbInformation();
 $Psr16Adapter = new Psr16Adapter('Files');
