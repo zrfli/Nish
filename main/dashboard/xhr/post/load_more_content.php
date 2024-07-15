@@ -53,7 +53,7 @@ try {
 
                 $data['posts'][$i]['slug'] =  match ($params) {
                     'posts' => $post['post_type'].'/'.$post['slug'] ?? '',
-                    'pages' => $post['page_type'].'/'.$post['slug'] ?? '',
+                    'pages' => 'page/'.$post['slug'] ?? '',
                 };
 
                 $data['posts'][$i]['title'] =  match ($params) {

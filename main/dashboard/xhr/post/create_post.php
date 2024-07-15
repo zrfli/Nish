@@ -56,9 +56,7 @@ try {
                 $uploadedImagePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $albumImages;
                 
                 if (in_array($fileExtension, $supportedFormats)) {
-                    if (!is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir)) { 
-                        mkdir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir, 0777, true); 
-                    }
+                    if (!is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir)) { mkdir($_SERVER['DOCUMENT_ROOT'].'/'.$uploadDir, 0777, true); }
     
                     if (move_uploaded_file($tempFilePath, $uploadedImagePath)) {
                         if ($fileExtension !== 'gif') {
@@ -124,9 +122,7 @@ try {
         } 
         
         if (isset($_FILES['albumImages'])) {
-            foreach ($tempContentFiles['images'] as $image) { 
-                $contentFile['picture'][] = ['url' => $image]; 
-            }
+            foreach ($tempContentFiles['images'] as $image) { $contentFile['picture'][] = ['url' => $image]; }
         }
 
         $insert_post = $db -> prepare('INSERT INTO `Ms_Posts` (`user_id`,`slug`,`post_title`,`post_text`,`post_type`,`post_file`,`cover_image`,`language`,`time`) VALUES (:userId,:contentSlug,:contentTitle,:contentHtmlMarkup,:contentType,:contentFile,:contentCoverImage,:contentLanguage,:contentTime);');

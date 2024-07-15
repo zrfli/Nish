@@ -132,60 +132,62 @@ try {
         } else if($postMethod == 'create_content') {
           $data['data'] = '<script type="text/javascript" src="assets/dashboard/tinymce/tinymce.min.js"></script>
                             <script>
-                              const post_image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
-                                const xhr = new XMLHttpRequest();
-                                xhr.withCredentials = false;
-                                xhr.open("POST", "xhr/dashboard/post/upload_post_content_images");
+                              if (typeof post_image_upload_handler === "undefined") {
+                                const post_image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
+                                  const xhr = new XMLHttpRequest();
+                                  xhr.withCredentials = false;
+                                  xhr.open("POST", "xhr/dashboard/post/upload_post_content_images");
 
-                                xhr.upload.onprogress = (e) => { progress(e.loaded / e.total * 100); };
+                                  xhr.upload.onprogress = (e) => { progress(e.loaded / e.total * 100); };
 
-                                xhr.onload = () => {
-                                  if (xhr.status === 403) {
-                                    reject({ message: "HTTP Error: " + xhr.status, remove: true });
-                                    return;
-                                  }
+                                  xhr.onload = () => {
+                                    if (xhr.status === 403) {
+                                      reject({ message: "HTTP Error: " + xhr.status, remove: true });
+                                      return;
+                                    }
 
-                                  if (xhr.status < 200 || xhr.status >= 300) {
-                                    reject("HTTP Error: " + xhr.status);
-                                    return;
-                                  }
+                                    if (xhr.status < 200 || xhr.status >= 300) {
+                                      reject("HTTP Error: " + xhr.status);
+                                      return;
+                                    }
 
-                                  const json = JSON.parse(xhr.responseText);
+                                    const json = JSON.parse(xhr.responseText);
 
-                                  if (!json || typeof json.location != "string") {
-                                    reject("Invalid JSON: " + xhr.responseText);
-                                    return;
-                                  }
+                                    if (!json || typeof json.location != "string") {
+                                      reject("Invalid JSON: " + xhr.responseText);
+                                      return;
+                                    }
 
-                                  resolve(json.location);
-                                };
+                                    resolve(json.location);
+                                  };
 
-                                xhr.onerror = () => {
-                                  reject("Image upload failed due to a XHR Transport error. Code: " + xhr.status);
-                                };
+                                  xhr.onerror = () => {
+                                    reject("Image upload failed due to a XHR Transport error. Code: " + xhr.status);
+                                  };
 
-                                const formData = new FormData();
-                                formData.append("handledImages", blobInfo.blob(), blobInfo.filename());
+                                  const formData = new FormData();
+                                  formData.append("handledImages", blobInfo.blob(), blobInfo.filename());
 
-                                xhr.send(formData);
-                              });
-                          
-                              tinymce.init({
-                                selector: "textarea#contentHtmlMarkup",
-                                height: 500,
-                                license_key: "gpl",
-                                plugins: [
-                                  "advlist", "autolink", "lists", "link", "image", "charmap",
-                                  "anchor", "searchreplace", "visualblocks",
-                                  "insertdatetime", "media", "table", "wordcount"
-                                ],
-                                toolbar: "undo redo | blocks | " +
-                                "bold italic backcolor | alignleft aligncenter " +
-                                "alignright alignjustify | bullist numlist outdent indent | " +
-                                "removeformat | help",
-                                content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:16px }",
-                                images_upload_handler: post_image_upload_handler
-                              });
+                                  xhr.send(formData);
+                                });
+                            
+                                tinymce.init({
+                                  selector: "textarea#contentHtmlMarkup",
+                                  height: 500,
+                                  license_key: "gpl",
+                                  plugins: [
+                                    "advlist", "autolink", "lists", "link", "image", "charmap",
+                                    "anchor", "searchreplace", "visualblocks",
+                                    "insertdatetime", "media", "table", "wordcount"
+                                  ],
+                                  toolbar: "undo redo | blocks | " +
+                                  "bold italic backcolor | alignleft aligncenter " +
+                                  "alignright alignjustify | bullist numlist outdent indent | " +
+                                  "removeformat | help",
+                                  content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:16px }",
+                                  images_upload_handler: post_image_upload_handler
+                                });
+                              }
                             </script>
                             <h2 class="text-lg font-medium mb-2">Gönderi Oluştur</h2>
                             <div id="cardDetailsContent" class="grid gap-2 mt-3 grid-cols-1 items-center">

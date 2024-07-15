@@ -1,5 +1,5 @@
 <?php
-if ($_SERVER['REQUEST_URI'] != '/xhr/post/base_posts'){ header('Location: /not-found'); exit(); }
+if ($_SERVER['REQUEST_URI'] != '/xhr/post/base_posts') { header('Location: /not-found'); exit(); }
 
 require_once '../../src/language/language.php';
 require_once '../../src/config.php';

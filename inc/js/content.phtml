@@ -514,6 +514,8 @@ function updateAndDisplayPosts(data) {
 function serializePost(data){
     if (!data) { return; }
 
+    var params = window.location.pathname.split('/').pop();
+
     if (data.type == 'announcements') {
         posts.announcements.push(`<article class="flex">
                                         <div class="mr-4 h-16 w-16 flex-shrink-0 overflow-hidden bg-[#6A5B3E] text-white">
@@ -522,7 +524,7 @@ function serializePost(data){
                                         </div>
                                         <div class="space-y-2">
                                             <a href="${data.url}" rel="noopener noreferrer"><h2 class="text-lg font-bold leading-tight text-black dark:text-white line-clamp-2 hover:underline">${data.title}</h2></a>
-                                            <p class="font-light text-sm line-clamp-2 dark:text-gray-400">${DOMPurify.sanitize(data.description, {USE_PROFILES: {html: false}})}</p>
+                                            <p class="text-xs line-clamp-2 dark:text-gray-400">${DOMPurify.sanitize(data.description, {USE_PROFILES: {html: false}})}</p>
                                             <a href="${data.url}" rel="noopener noreferrer" class="text-xs font-medium underline underline-offset-4 text-black dark:text-gray-300 hover:no-underline">Devamını oku</a>
                                         </div>
                                     </article>`);
@@ -571,13 +573,11 @@ function serializePost(data){
                                 </div>`);
     }
 
-    var params = window.location.pathname.split('/').pop();
-
     if (window.location.pathname == '/') { 
         if (posts[data.type]) { $('#'+data.type+'Content').html(posts[data.type].join('')); }
     } else { $('#'+params+'Content').html(posts[params].join('')); }
 
-    //if (params != '/' && posts[params].length < 6) { $('#loadMorePostContent').remove(); }
+    //if (posts[params].length < 6) { $("#loadMorePostContent").remove();
 } 
 
 function getPosts() {
