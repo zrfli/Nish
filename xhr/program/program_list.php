@@ -1,6 +1,7 @@
 <?php
 if ($_SERVER['REQUEST_URI'] != '/xhr/program/program_list') { header('Location: /not-found'); exit(); }
 
+require_once $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/languageController.php';
 
