@@ -384,6 +384,171 @@ function setCookieStatus(data){
 <?php endif; ?>
 
 <?php if ($_SERVER['REQUEST_URI'] == '/'): ?>
+function nishPay() {
+    $('#nish-pay').remove();
+
+    $('body').append(`<div id="nish-pay" tabindex="-1" class="fixed top-0 left-0 right-0 z-50 h-full w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 justify-center items-center flex backdrop-blur-sm" aria-modal="true" role="dialog">
+                            <div id="nish-pay-modal-main" class="relative w-full max-w-lg max-h-full">
+                                <div class="rounded-xl shadow-2xl bg-white dark:bg-black shadow-black/[.7]" >
+                                    <div class="flex items-center justify-between p-4 border-b border-gray-300 dark:border-neutral-700 rounded-t">
+                                        <h3 class="text-xl font-medium text-black dark:text-white">NishCard Bakiye Yükleme</h3>
+                                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-gray-300 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="nish-pay">
+                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-4 h-auto max-h-[30rem] overflow-x-hidden overflow-y-auto">
+                                        <div id="nishPayContent">
+                                            <div class="text-center">
+                                                <div role="status">
+                                                    <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin fill-black" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.59c0 27.615-22.386 50.001-50 50.001s-50-22.386-50-50 22.386-50 50-50 50 22.386 50 50Zm-90.919 0c0 22.6 18.32 40.92 40.919 40.92 22.599 0 40.919-18.32 40.919-40.92 0-22.598-18.32-40.918-40.919-40.918-22.599 0-40.919 18.32-40.919 40.919Z" fill="currentColor"/><path d="M93.968 39.04c2.425-.636 3.894-3.128 3.04-5.486A50 50 0 0 0 41.735 1.279c-2.474.414-3.922 2.919-3.285 5.344.637 2.426 3.12 3.849 5.6 3.484a40.916 40.916 0 0 1 44.131 25.769c.902 2.34 3.361 3.802 5.787 3.165Z" fill="currentFill"/></svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`);
+
+    renderNishPayContent();
+
+    $('[data-modal-hide="nish-pay"]').on('click', function() { $('#nish-pay').remove(); });
+}
+
+var nishPayError = `<div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-gray-600" role="alert">
+                            <p class="text-xs text-yellow-600 text-center">An error occurred during the process. Please try again!</p>
+                        </div>`;
+
+function renderNishPayContent() {
+    var nishPayModalContent = $('#nishPayContent');
+   
+    try {
+        $.post("xhr/payment/nish_pay")
+            .done(function(data) {
+                if (data['status'] === 'success' && data['statusCode'] === 200) { 
+                    nishPayModalContent.html(`<h3 class="mb-4 text-base font-semibold dark:text-white">Kimlik Doğrulama</h3>
+                                                <div>
+                                                    <div>
+                                                        <label for="userAccountNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Öğrenci / Sicil Numarası</label>
+                                                        <input type="number" name="userAccountNumber" id="userAccountNumber" class="shadow-sm focus:ring-0 focus:border-black border border-gray-300 dark:border-neutral-700 dark:bg-black dark:text-gray-300 text-gray-900 font-medium text-xs rounded-lg block w-full p-2.5" placeholder="111111111111" autocomplete="on" maxlength="12"  pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length == 12) return false;">
+                                                    </div>
+                                                    <div class="flex justify-center mt-4">
+                                                        <button class="text-white bg-black hover:bg-black/80 font-medium rounded-lg text-xs px-5 py-2.5 text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800" type="button" onclick="nishPayCheckUser();">Devam et</button>
+                                                    </div>
+                                                </div>`);
+                } else { nishPayModalContent.html(nishPayError); }
+            })
+            .fail(function(data) { nishPayModalContent.html(nishPayError); }
+        )
+    } catch (e) { nishPayModalContent.html(nishPayError); }
+}
+
+function nishPayCheckUser() {
+    var nishPayModalContent = $('#nishPayContent');
+    let userAccountNumber = DOMPurify.sanitize($('#userAccountNumber').val());
+
+    try {
+        $.post("xhr/payment/check_user_account", { accountNumber : userAccountNumber })
+            .done(function(data) {
+                if (data['status'] === 'success' && data['statusCode'] === 200) { 
+                    $('#nish-pay-modal-main').removeClass('max-w-lg').addClass('max-w-4xl');
+
+                    nishPayModalContent.html(`<h3 class="mb-4 text-base font-semibold dark:text-white">Hesap Bilgileri</h3>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div class="gap-4 space-y-2 text-center">
+                                                        <div>
+                                                            <label for="fullName" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Ad Soyad</label>
+                                                            <input type="text" name="fullName" id="fullName" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-400 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="Zeynep Serra Karaman" disabled>
+                                                        </div>
+                                                        <div>
+                                                            <label for="idenityNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">T.C. Kimlik No</label>
+                                                            <input type="text" name="idenityNumber" id="idenityNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-400 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="1*********0" disabled>
+                                                        </div>
+                                                        <div>
+                                                            <label for="idenityNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Öğrenci / Sicil Numarası</label>
+                                                            <input type="text" name="idenityNumber" id="idenityNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-400 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="${userAccountNumber}" disabled>
+                                                        </div>
+                                                        <div>
+                                                            <label for="email" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Email</label>
+                                                            <input type="text" name="idenityNumber" id="idenityNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-400 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="zser*****@****.***" disabled>
+                                                        </div>
+                                                        <div>
+                                                            <label for="phoneNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Telefon Numarası</label>
+                                                            <input type="text" name="idenityNumber" id="idenityNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-400 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="538*****50" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="gap-4 space-y-2">
+                                                        <div class="grid grid-cols-2 gap-2 text-center">
+                                                            <div>
+                                                                <label for="fullName" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Mevcut Bakiye</label>
+                                                                <input type="text" name="fullName" id="fullName" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-400 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="12 TL" disabled>
+                                                            </div>
+                                                            <div>
+                                                                <label for="idenityNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">İşlem Numarası</label>
+                                                                <input type="text" name="idenityNumber" id="idenityNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-400 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="#${Math.floor((Math.random() * 1000000000))}" disabled>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="mb-2 text-base font-semibold dark:text-white">Yüklenecek Miktar</h3>
+                                                            <ul class="gap-2 grid grid-cols-4">
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>10 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>20 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>30 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>50 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>100 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>150 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>200 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                                <li>
+                                                                    <div class="flex items-center rounded-lg bg-gray-50 p-2 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:shadow border cursor-pointer justify-center" onclick="paymentMethod('bank_transfer');">
+                                                                        <span>500 TL</span>
+                                                                    </div> 
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div>
+                                                            <button class="text-white bg-black hover:bg-black/80 font-medium rounded-lg text-xs px-5 py-2.5 w-full text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800" type="button" onclick="updateInformation();">Ödeme yap</button>
+                                                        </div>
+                                                        <p class="text-xs text-black dark:text-gray-300 font-medium">
+                                                            You can cancel your plan at any time. Purchases made by credit card can’t be refunded, although your credit can be transferred to another account.
+                                                        </p>
+                                                    </div>
+                                                </div>`);
+                } else { nishPayModalContent.html(nishPayError); }
+            })
+            .fail(function(data) { nishPayModalContent.html(nishPayError); }
+        )
+    } catch (e) { nishPayModalContent.html(nishPayError); }
+}
+
 function putApplyVideo() { $('#applyVideoContent').html(`<source src="assets/static/video/207fa6df-2d62-4f2a-ad52-769580e89e38.webm" type="video/webm" />`); }
 
 var quickAccess = [];
@@ -411,7 +576,7 @@ function updateAndDisplayBaseCarousel(data) {
             $.each(data['baseCarouselData'], function (key, value) {
                 $('#baseCarousel div[data-carousel-item]').removeClass('animate-pulse').each(function(index) {
                     if (parseInt(index) + 1 === parseInt(key)) {
-                        $(this).find('a').attr('href', value.url);
+                        if (value.url) { $(this).find('a').attr('href', value.url); }
                         $(this).find('img').attr('src', value.image);
                     }
                 });
@@ -472,7 +637,7 @@ function getbaseCarousel() {
             $.each(parsedData.baseCarousel, function (key, value) {
                 $('#baseCarousel div[data-carousel-item]').removeClass('animate-pulse').each(function(index) {
                     if (parseInt(index) + 1 === parseInt(key)) {
-                        $(this).find('a').attr('href', value.url);
+                        if (value.url) { $(this).find('a').attr('href', value.url); }
                         $(this).find('img').attr('src', value.image);
                     }
                 });

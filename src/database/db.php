@@ -16,10 +16,6 @@ require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/languageController.php';
 //require_once $_SERVER['DOCUMENT_ROOT'].'/src/logger/logger.php';
 
-if (isset($_COOKIE['lang']) && in_array($_COOKIE['lang'], $langs)) {
-    require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/' . strip_tags($_COOKIE['lang']) . '.php';
-} else { require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/turkish.php'; }
-
 $dbClass = new misyDbInformation();
 //$logger = new MisyLogger($dbClass);
 

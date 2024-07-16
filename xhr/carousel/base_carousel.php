@@ -24,14 +24,14 @@ try {
         $data['status'] = 'success'; 
         $data['statusCode'] = 200; 
 
-        $data['baseCarouselData'][1]['url'] = 'https://misy.online/announcements/2024-yili-mezuniyet-toreni-hakkinda-onemli-duyuru-466834';
-        $data['baseCarouselData'][1]['image'] = 'uploads/carousel/2024/05/31/5.webp?v=35';
+        $data['baseCarouselData'][1]['url'] = '';
+        $data['baseCarouselData'][1]['image'] = 'uploads/carousel/2024/05/31/0ce3cfb8-dcca-47f1-afd7-db00dab10be0.webp';
 
         $data['baseCarouselData'][2]['url'] = 'https://misy.online/announcements/2024-yili-mezuniyet-toreni-hakkinda-onemli-duyuru-466834';
-        $data['baseCarouselData'][2]['image'] = 'uploads/carousel/2024/05/31/3.webp?v=35';
-  
-        $data['baseCarouselData'][3]['url'] = 'car3';
-        $data['baseCarouselData'][3]['image'] = 'uploads/carousel/2024/05/31/1.webp?v=3';
+        $data['baseCarouselData'][2]['image'] = 'uploads/carousel/2024/05/31/5.webp?v=35';
+
+        $data['baseCarouselData'][3]['url'] = 'https://misy.online/announcements/2024-yili-mezuniyet-toreni-hakkinda-onemli-duyuru-466834';
+        $data['baseCarouselData'][3]['image'] = 'uploads/carousel/2024/05/31/3.webp?v=35';
     }
 } catch(PDOException $e) { $data['status'] = false; $data['statusCode'] = 500; $data['message'] = 'database error!'; }
 

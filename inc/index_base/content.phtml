@@ -1,6 +1,6 @@
 <?php if ($_SERVER['REQUEST_URI'] != '/') { header('Location: /not-found'); exit(); } ?> 
 <main class="pt-20">
-    <section id="carousel-section" class="relative mt-2" data-carousel="static">
+    <section id="carousel" class="relative mt-2" data-carousel="static">
         <div id="baseCarousel" class="relative h-96 overflow-hidden">
             <div class="hidden duration-400 ease-linear animate-pulse bg-gray-200 dark:bg-neutral-800" data-carousel-item>
                 <a rel="noopener noreferrer" aria-hidden="true" tabindex="-1">
@@ -29,6 +29,7 @@
             </span>
         </button>
     </section>
+    <button onclick="nishPay()">bakiye</button>
     <section aria-label="quickaccess" class="py-12">
         <div class="px-4 mx-auto max-w-screen-xl">
             <div class="text-center mb-6">
