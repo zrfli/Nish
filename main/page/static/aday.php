@@ -4,7 +4,7 @@
         <div class="mb-8 grid items-center gap-8 lg:mb-16 lg:grid-cols-9 lg:gap-9">
             <div class="col-span-1 lg:col-span-6 text-center sm:mb-6 lg:mb-0 lg:text-left">
                 <div class="mb-6 text-sm text-black dark:text-white">
-                    <span class="text-sm font-medium">Aday bilgi formu</span>
+                    <span class="text-sm font-medium text-gray-900 dark:text-gray-300">Aday bilgi formu</span>
                 </div>
                 <h1 class="mb-6 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl xl:text-6xl dark:text-white">Formu gönder + %5 burs kazan</h1>
                 <div class="mx-auto max-w-xl lg:ml-0" id="applicationForm">

@@ -138,7 +138,7 @@ function misyVeriablesControl() {
         });
     });
 } 
-<?php if ($_SERVER['REQUEST_URI'] == '/aday' || $_SERVER['REQUEST_URI'] == '/announcements' || $_SERVER['REQUEST_URI'] == '/news' || $_SERVER['REQUEST_URI'] == '/events' || $_SERVER['REQUEST_URI'] == '/research' || $_SERVER['REQUEST_URI'] == '/achievements') : ?>
+<?php if ($_SERVER['REQUEST_URI'] == '/' || $_SERVER['REQUEST_URI'] == '/aday' || $_SERVER['REQUEST_URI'] == '/announcements' || $_SERVER['REQUEST_URI'] == '/news' || $_SERVER['REQUEST_URI'] == '/events' || $_SERVER['REQUEST_URI'] == '/research' || $_SERVER['REQUEST_URI'] == '/achievements') : ?>
 function setProgressToast(params) {
     var status = params;
 
@@ -164,6 +164,8 @@ function setProgressToast(params) {
         $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-red-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/></svg><span class="text-black dark:text-white">Alanlar boş bırakılamaz!</span>`);
     } else if (status === 4) {
         $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/></svg><span class="text-black dark:text-white">İçerik bulunamadı!</span>`);
+    } else if (status === 5) {
+        $('#progressToastContent').html(`<svg class="mr-1 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/></svg><span class="text-black dark:text-white">Kullanıcı bulunamadı!</span>`);
     }
 
     if (status > 0) { setTimeout(function() { $('#progress-toast').remove(); }, 600); }
@@ -384,8 +386,14 @@ function setCookieStatus(data){
 <?php endif; ?>
 
 <?php if ($_SERVER['REQUEST_URI'] == '/'): ?>
+const nishPaymentError = `<div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-gray-600" role="alert">
+                    <p class="text-sm text-yellow-600 text-center">İşlem sırasında bir hata oluştu. Lütfen tekrar deneyiniz.</p>
+                </div>`;
 var nishPayAmountList = [];
 var lastNishPayAmountId;
+var nishPayAmount = 0;
+var nishPayUserAccountNumber;
+
 
 function nishPay() {
     nishPayAmountList = []; 
@@ -436,8 +444,8 @@ function renderNishPayContent() {
                     nishPayModalContent.html(`<h3 class="mb-4 text-base font-semibold dark:text-white">Kimlik Doğrulama</h3>
                                                 <div>
                                                     <div>
-                                                        <label for="userAccountNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Öğrenci / Sicil Numarası</label>
-                                                        <input type="number" name="userAccountNumber" id="userAccountNumber" class="shadow-sm focus:ring-0 focus:border-black border border-gray-300 dark:border-neutral-700 dark:bg-black dark:text-gray-300 text-gray-900 font-medium text-xs rounded-lg block w-full p-2.5" placeholder="111111111111" autocomplete="on" maxlength="12"  pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length == 12) return false;">
+                                                        <label for="userAccountNumber" class="block mb-1 text-xs font-medium text-gray-900 text-center dark:text-gray-300">Öğrenci / Sicil Numarası</label>
+                                                        <input type="text" name="userAccountNumber" id="userAccountNumber" class="shadow-sm focus:ring-0 focus:border-black border border-gray-300 dark:border-neutral-700 dark:bg-black dark:text-gray-300 text-gray-900 font-medium text-xs text-center rounded-lg block w-full p-2.5" placeholder="nisantasi" autocomplete="on" maxlength="64">
                                                     </div>
                                                     <div class="flex justify-center mt-4">
                                                         <button class="text-white bg-black hover:bg-black/80 font-medium rounded-lg text-xs px-5 py-2.5 text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800" type="button" onclick="nishPayCheckUser();">Devam et</button>
@@ -456,14 +464,22 @@ function renderNishPayContent() {
 }
 
 function nishPayCheckUser() {
+    setProgressToast(0);
+
     var amountElement ='';
     var nishPayModalContent = $('#nishPayContent');
     let userAccountNumber = DOMPurify.sanitize($('#userAccountNumber').val());
+
+    if (!userAccountNumber) { setProgressToast(5); return; }
 
     try {
         $.post("xhr/payment/check_user_account", { accountNumber : userAccountNumber })
             .done(function(data) {
                 if (data['status'] === 'success' && data['statusCode'] === 200) { 
+                    nishPayUserAccountNumber = userAccountNumber;
+
+                    setProgressToast(1);
+
                     $('#nish-pay-modal-main').removeClass('max-w-lg').addClass('max-w-4xl');
 
                     $.each(nishPayAmountList, function (key, value) { 
@@ -478,20 +494,20 @@ function nishPayCheckUser() {
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div class="gap-4 space-y-2 text-center">
                                                         <div>
-                                                            <label for="fullName" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Ad Soyad</label>
-                                                            <input type="text" name="fullName" id="fullName" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="Zeynep Serra Karaman" disabled>
+                                                            <label for="nishPayfullName" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Ad Soyad</label>
+                                                            <input type="text" name="nishPayfullName" id="nishPayfullName" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="${data.userInformation.fullName}" disabled>
                                                         </div>
                                                         <div>
-                                                            <label for="idenityNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Öğrenci / Sicil Numarası</label>
-                                                            <input type="text" name="idenityNumber" id="idenityNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="${userAccountNumber}" disabled>
+                                                            <label for="nishPayAccountNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Öğrenci / Sicil Numarası</label>
+                                                            <input type="text" name="nishPayAccountNumber" id="nishPayAccountNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="${userAccountNumber}" disabled>
                                                         </div>
                                                         <div>
-                                                            <label for="phoneNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Telefon Numarası</label>
-                                                            <input type="text" name="idenityNumber" id="idenityNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="538*****50" disabled>
+                                                            <label for="nishPayPhoneNumber" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Telefon Numarası</label>
+                                                            <input type="text" name="nishPayPhoneNumber" id="nishPayPhoneNumber" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="${data.userInformation.phoneNumber}" disabled>
                                                         </div>
                                                         <div>
-                                                            <label for="fullName" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Mevcut Bakiye</label>
-                                                            <input type="text" name="fullName" id="fullName" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="12 TL" disabled>
+                                                            <label for="nishPayBalance" class="block mb-1 text-xs font-medium text-gray-900 dark:text-gray-300">Mevcut Bakiye</label>
+                                                            <input type="text" name="nishPayBalance" id="nishPayBalance" class="shadow-sm bg-gray-100 border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 text-gray-500 dark:text-gray-300 font-medium text-xs text-center rounded-lg block w-full p-2.5" value="${data.userInformation.nishCardBalance} TL" disabled>
                                                         </div>
                                                     </div>
                                                     <div class="gap-4 space-y-2">
@@ -500,7 +516,7 @@ function nishPayCheckUser() {
                                                             <ul class="gap-2 grid grid-cols-4 md:grid-cols-5">${amountElement}</ul>
                                                         </div>
                                                         <div>
-                                                            <button class="text-white bg-black hover:bg-black/80 font-medium rounded-lg text-xs px-5 py-2.5 w-full text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800" type="button" onclick="updateInformation();">Ödeme yap</button>
+                                                            <button class="text-white bg-black hover:bg-black/80 font-medium rounded-lg text-xs px-5 py-2.5 w-full text-center dark:hover:bg-neutral-800/80 dark:bg-neutral-800" type="button" onclick="nishPayPaymentEvent();">Ödeme yap</button>
                                                         </div>
                                                         <p class="text-xs text-black dark:text-gray-300 font-medium">Yapılan ödemelerde iade yapılmamaktadır. Bu nedenle, yükleme işlemleri sırasında bu durumu göz önünde bulundurmanız önem arz etmektedir.</p>
                                                         <div class="flex justify-between">
@@ -517,32 +533,68 @@ function nishPayCheckUser() {
                                                     </div>
                                                 </div>`);
 
-                    $('#nish-pay-action-group').addClass('inline-flex gap-2').prepend(`<button onclick="nishPay();" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-gray-300 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+                    $('#nish-pay-action-group').addClass('inline-flex gap-2').prepend(`<button id="nishPayBackBtn" onclick="nishPay();" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-gray-300 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
                                                                                         <svg class="w-4 h-4" height="14" width="14" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 0.467 0.467" xml:space="preserve"><path d="M.457.383A.01.01 0 0 1 .448.377C.446.375.418.31.309.297L.227.293v.08a.01.01 0 0 1-.005.009.01.01 0 0 1-.011 0L.005.241a.01.01 0 0 1 0-.017L.212.085a.01.01 0 0 1 .011 0l.005.008v.075c.045.006.239.041.239.204a.01.01 0 0 1-.008.01H.457"/></svg>
                                                                                     </button>`);
-                } else { nishPayModalContent.html(nishPayError); }
+                } else { setProgressToast(5); }
             })
-            .fail(function(data) { nishPayModalContent.html(nishPayError); }
+            .fail(function(data) { setProgressToast(2); nishPayModalContent.html(nishPayError); }
         )
-    } catch (e) { nishPayModalContent.html(nishPayError); }
+    } catch (e) { setProgressToast(2); nishPayModalContent.html(nishPayError); }
 }
 
 function nishPayAmountController (key, value) {
     var nishPayContent = $('#nishPayContent');
-
-    if (!key || !value) { nishPayContent.html(nishPayError); return; }
-
     var nishPayAmountId = DOMPurify.sanitize(key);
-    var nishPayAmount = DOMPurify.sanitize(value);
+
+    nishPayAmount = DOMPurify.sanitize(value);
+
+    if (!nishPayAmountId || !nishPayAmount) { nishPayContent.html(nishPayError); return; }
 
     if ($.inArray(parseInt(nishPayAmount), nishPayAmountList) === -1) { 
         nishPayAmountList = []; 
+        nishPayAmount = 0;
+        nishPayUserAccountNumber = '';
         nishPayContent.html(nishPayError);
         return; 
     } 
 
-    $('#'+lastNishPayAmountId).removeClass('border-dashed border-blue-400').addClass('border-gray-200 dark:border-neutral-700');  
+    lastNishPayAmountId = nishPayAmountId;
+
+    if (lastNishPayAmountId) { $('#'+lastNishPayAmountId).removeClass('border-dashed border-blue-400').addClass('border-gray-200 dark:border-neutral-700'); }
+
     $('#'+nishPayAmountId).removeClass('border-gray-200 dark:border-neutral-700').addClass('border-dashed border-blue-400');
+}
+
+function nishPayPaymentEvent() {
+    var nishPayContent = $('#nishPayContent');
+
+    if ($.inArray(parseInt(nishPayAmount), nishPayAmountList) === -1 || !nishPayUserAccountNumber) { 
+        nishPayAmountList = []; 
+        nishPayAmount = 0;
+        nishPayUserAccountNumber = '';
+        nishPayContent.html(nishPayError);
+        return; 
+    } 
+    
+    nishPayContent.html(`<div role="status" class="flex h-56 w-full animate-pulse bg-gray-300"></div>`);
+
+    try {
+        $.post("xhr/payment/create_payment_request", { accountNumber: nishPayUserAccountNumber, paymentAmount: nishPayAmount, paymentType: 'iyzipay' })
+            .done(function(data) {
+                if (data['status'] === 'success' && data['statusCode'] === 200) { 
+                    if (/^(http(s)?:\/\/|www\.)\S+/i.test(data.paymentContent)) {
+                        $('#nish-pay-modal-main').removeClass('max-w-4xl').addClass('max-w-lg');
+
+                        $.getScript('assets/static/js/vpos.js');
+
+                        nishPayContent.html(`<iframe id="paymentIframe" class="w-full" style="height: 61rem;" scrolling="no" src="${data.paymentContent}"></iframe>`);
+                    } else { nishPayContent.html(nishPaymentError); }
+                } else { nishPayContent.html(nishPaymentError); }
+            })
+            .fail(function(data) { nishPayContent.html(nishPaymentError); }
+        )
+    } catch (e) { nishPayContent.html(nishPayError); }
 }
 
 function putApplyVideo() { $('#applyVideoContent').html(`<source src="assets/static/video/207fa6df-2d62-4f2a-ad52-769580e89e38.webm" type="video/webm" />`); }

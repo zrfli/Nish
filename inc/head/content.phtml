@@ -35,5 +35,5 @@
     <style>::-webkit-scrollbar{width: 0px;}</style>
     <!--<script src="https://cdn.tailwindcss.com"></script>-->     
 </head>
-<body class="bg-white dark:bg-black antialiased">
+<body class="bg-white dark:bg-black antialiased <?= $_SERVER['REQUEST_URI'] == '/' || $_SERVER['REQUEST_URI'] == '/aday' ? "bg-[url('/assets/static/img/background/69a02caa-248f-43b2-808b-6867e7e24462.svg')] dark:bg-[url('/assets/static/img/background/392a42c3-69f7-4792-abb8-b9e5cc180483.svg')]" : ''; ?>">
 <noscript>This site requires Javascript to work, please enable Javascript in your browser or use a browser with Javascript support</noscript>
