@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 13, 2024 at 09:51 PM
--- Server version: 10.3.38-MariaDB
+-- Generation Time: Jul 18, 2024 at 09:11 PM
+-- Server version: 10.3.37-MariaDB
 -- PHP Version: 8.1.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -88,6 +88,29 @@ CREATE TABLE `Ms_Pages` (
   `language` enum('tr','en') DEFAULT 'tr',
   `time` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Ms_Payments`
+--
+
+CREATE TABLE `Ms_Payments` (
+  `id` int(11) NOT NULL,
+  `user_id` varchar(64) NOT NULL,
+  `conversion_id` mediumtext NOT NULL,
+  `ip_address` varchar(255) NOT NULL,
+  `return_message` text DEFAULT NULL,
+  `amount` double NOT NULL,
+  `paid_amount` double DEFAULT NULL,
+  `currency` varchar(24) DEFAULT NULL,
+  `platform` varchar(24) NOT NULL,
+  `payment_url` mediumtext DEFAULT NULL,
+  `payment_type` varchar(64) NOT NULL,
+  `card_details` text DEFAULT NULL,
+  `status` enum('0','1','2') NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci ROW_FORMAT=DYNAMIC;
 
 -- --------------------------------------------------------
 
@@ -241,6 +264,12 @@ ALTER TABLE `Ms_Pages`
   ADD PRIMARY KEY (`id`) USING BTREE;
 
 --
+-- Indexes for table `Ms_Payments`
+--
+ALTER TABLE `Ms_Payments`
+  ADD PRIMARY KEY (`id`) USING BTREE;
+
+--
 -- Indexes for table `Ms_Posts`
 --
 ALTER TABLE `Ms_Posts`
@@ -310,6 +339,12 @@ ALTER TABLE `Ms_Logs`
 -- AUTO_INCREMENT for table `Ms_Pages`
 --
 ALTER TABLE `Ms_Pages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Ms_Payments`
+--
+ALTER TABLE `Ms_Payments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
