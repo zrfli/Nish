@@ -13,7 +13,7 @@ DirectoryIndex index.php
 <IfModule mod_headers.c>
     Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
     Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "DENY"
+    #Header always set X-Frame-Options "DENY"
     Header always set X-XSS-Protection "1; mode=block"
 </IfModule>
 
@@ -52,5 +52,5 @@ RewriteRule ^page/([a-zA-Z0-9_-]+)$ main/page/dynamic/page.php?slug=$1 [L]
 
 RewriteRule ^([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ main/page/page.php?params=$1&slug=$2 [L]
 
-RewriteRule ^api/v2/payment/gateway/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ api/v2/payment/gateway.php?provider=$1&conversionId=$2 [L]
+RewriteRule ^api/v2/payment/gateway/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ api/v2/payment/gateway.php?provider=$1&conversationId=$2 [L]
 RewriteRule ^api/v2/common-pay/bin/([0-9]+)$ api/v2/common-pay/bin.php?bin=$1 [L]
