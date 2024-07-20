@@ -56,8 +56,8 @@
                 </div>
             </div>
             <div class="mx-auto flex flex-col items-center">
-                <img src="assets/static/img/0190973b-bdc3-7920-8cc6-841062aa338f.webp" class="max-w-xs h-auto" alt="" loading="lazy" decoding="async" />
-                <img src="assets/static/img/f1f6c982-af7f-4c46-928c-e33ef89e6b96.webp" class="max-w-xs h-auto mt-4" alt="" loading="lazy" decoding="async" />
+                <img src="assets/static/img/page/0190d111-332c-7d5c-a830-289757cd5429.webp" class="max-w-xs h-auto" alt="" loading="lazy" decoding="async" />
+                <img src="assets/static/img/page/ebb38fd4-e27a-46a7-813e-27a0fec0d9f5.webp" class="max-w-xs h-auto mt-4" alt="" loading="lazy" decoding="async" />
             </div>
         </div>
 

@@ -8,7 +8,7 @@
         <div class="col-span-full xl:col-auto">
             <div class="p-4 mb-4 bg-white dark:bg-black border border-gray-200 dark:border-neutral-700 rounded-lg shadow-sm">
                 <div class="flex space-x-4">
-                    <img class="rounded w-28 h-28 dark:border-neutral-700 border" src="<?= $auth -> misyAvatar() ?? ''; ?>" alt="" loading="lazy" decoding="async" />
+                    <img class="rounded w-28 h-28 dark:border-neutral-700 border object-cover" src="<?= $auth -> misyAvatar() ?? ''; ?>" alt="" loading="lazy" decoding="async" />
                     <div>
                         <h3 class="mb-1 text-base font-semibold dark:text-white">Fotoğraf</h3>
                         <div id="pictureStatus" class="font-medium">

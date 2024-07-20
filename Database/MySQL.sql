@@ -98,7 +98,7 @@ CREATE TABLE `Ms_Pages` (
 CREATE TABLE `Ms_Payments` (
   `id` int(11) NOT NULL,
   `user_id` varchar(64) NOT NULL,
-  `conversion_id` mediumtext NOT NULL,
+  `conversation_id` varchar(64) NOT NULL,
   `ip_address` varchar(255) NOT NULL,
   `return_message` text DEFAULT NULL,
   `amount` double NOT NULL,
@@ -163,7 +163,7 @@ CREATE TABLE `Ms_Users` (
   `gender` enum('0','1','2') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0',
   `address` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `phone_number` varchar(11) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
-  `avatar` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT 'assets/static/img/avatar.svg',
+  `avatar` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT 'assets/static/img/user/avatar.svg',
   `academic_info` varchar(200) NOT NULL DEFAULT '{"unit":null, "department":null, "tag":null}',
   `twofa_authentication` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT '{"secret_key": null, "status": 0}',
   `ip_address` tinytext CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,

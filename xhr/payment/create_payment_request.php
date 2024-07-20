@@ -4,8 +4,8 @@ if ($_SERVER['REQUEST_URI'] != '/xhr/payment/create_payment_request') { header('
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/database/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/language/languageController.php';
 require_once $_SERVER['DOCUMENT_ROOT'].'/src/payment/iyzipay/iyzipay.php';
-require_once $_SERVER['DOCUMENT_ROOT'].'/src/payment/paytr/paytr.php';
-require_once $_SERVER['DOCUMENT_ROOT'].'/src/payment/vakifbank/vakifbank.php';
+//require_once $_SERVER['DOCUMENT_ROOT'].'/src/payment/paytr/paytr.php';
+//require_once $_SERVER['DOCUMENT_ROOT'].'/src/payment/vakifbank/vakifbank.php';
 
 $dbClass = new misyDbInformation();
 
@@ -40,12 +40,12 @@ try {
     if (isset($_POST['paymentAmount'])) { $paymentAmount = htmlspecialchars($_POST['paymentAmount']);  } else { $errors['paymentAmount'] = 'paymentAmount is not correct!'; }
     if (isset($_POST['accountNumber'])) { $accountNumber = htmlspecialchars($_POST['accountNumber']); } else { $errors['accountNumber'] = 'accountNumber is not correct!'; }
 
-    $paymentData = ['conversionId' => rand(), 'clientIp' => getRealIpAddr(), 'currency' => 'TRY'];
+    $paymentData = ['conversationId' => rand(), 'clientIp' => getRealIpAddr(), 'currency' => 'TRY'];
 
     $merchantData = [
         'clientKey' => null,
         'apiUrl' => null, 
-        'callBackUrl' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/api/v2/payment/gateway/' . $paymentType . '/' . $paymentData['conversionId'],
+        'callBackUrl' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/api/v2/payment/gateway/' . $paymentType . '/' . $paymentData['conversationId'],
     ];
 
     if (!empty($errors)) {
@@ -55,9 +55,9 @@ try {
     } else {
         $db = new \PDO($dbClass -> misyGetDb('mysql'), $dbClass -> getUser(), $dbClass -> getPassword());
 
-        $create_payment_request = $db -> prepare("INSERT INTO `Ms_Payments` (`user_id`,`conversion_id`,`ip_address`,`amount`,`currency`,`platform`,`payment_type`) VALUES (:userId,:conversionId,:ipAddress,:amount,:currency,:platform,:paymentType);");
+        $create_payment_request = $db -> prepare("INSERT INTO `Ms_Payments` (`user_id`,`conversation_id`,`ip_address`,`amount`,`currency`,`platform`,`payment_type`) VALUES (:userId,:conversationId,:ipAddress,:amount,:currency,:platform,:paymentType);");
         $create_payment_request -> bindValue(':userId', $accountNumber, PDO::PARAM_STR);
-        $create_payment_request -> bindValue(':conversionId', $paymentData['conversionId'], PDO::PARAM_STR);
+        $create_payment_request -> bindValue(':conversationId', $paymentData['conversationId'], PDO::PARAM_STR);
         $create_payment_request -> bindValue(':ipAddress', $paymentData['clientIp'], PDO::PARAM_STR);
         $create_payment_request -> bindValue(':amount', $paymentAmount, PDO::PARAM_STR);
         $create_payment_request -> bindValue(':currency', $paymentData['currency'], PDO::PARAM_STR);
@@ -179,7 +179,7 @@ try {
                                 $cardExp = (substr($expYear, 2)) . $expMonth;
                                 $currency = $paymentData['currency'];
                                 $cardBrandCode = $binData['cardBrandCode'];
-                                $paymentId = $paymentData['conversionId'];
+                                $paymentId = $paymentData['conversationId'];
                                 $installment = 1; // taksi
                                 number_format($amount = 10.50); //tutar
                                 $paymentSessionInfo = base64_encode("Pan=$cardNumber&Ay=$expMonth&Yil=$expYear&Cvv=$cardCvv&Tutar=$amount");
@@ -228,7 +228,7 @@ try {
                 } else { $data['status'] = false; $data['statusCode'] = 406; $data['errors'] = 'invalid card number!'; }
             } else if ($paymentType == 'iyzipay') { 
                 $data['status'] = 'success'; $data['statusCode'] = 200;
-                $data['paymentContent'] = initializeIyzipayPaymentForm($paymentData['conversionId'], $merchantData['callBackUrl'], 'Nişantaşı', 'Üniversites', 'Token Random', 'nisantasi@nisantasi.edu.tr', $accountNumber, 'Token Random 2', 'Token Rnadom 3');
+                $data['paymentContent'] = initializeIyzipayPaymentForm($paymentData['conversationId'], $merchantData['callBackUrl'], 'Nişantaşı', 'Üniversites', 'Token Random', 'nisantasi@nisantasi.edu.tr', $accountNumber, 'Token Random 2', 'Token Rnadom 3');
             } else if ($paymentType == 'paytr') { 
               $data['paymentContent'] = generatePaytrToken("asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL, "asf" ?? NULL);
             } 
