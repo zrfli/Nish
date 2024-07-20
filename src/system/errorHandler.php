@@ -24,10 +24,10 @@ function errorHandler($errno, $errstr, $errfile, $errline) {
     $errstr = htmlspecialchars($errstr);
 
     $out = match ($errno) {
-        E_USER_ERROR => errorTemplate('Fatal error on line', $errfile, $errline,$errstr), 
-        E_USER_WARNING => errorTemplate('Warning', $errfile, $errline,$errstr), 
-        E_USER_NOTICE => errorTemplate('Notice', $errfile, $errline,$errstr),
-        default => errorTemplate('Unknown error type', $errfile, $errline,$errstr),
+        E_USER_ERROR => errorTemplate('Fatal error on line', $errfile, $errline, $errstr), 
+        E_USER_WARNING => errorTemplate('Warning', $errfile, $errline, $errstr), 
+        E_USER_NOTICE => errorTemplate('Notice', $errfile, $errline, $errstr),
+        default => errorTemplate('Unknown error type', $errfile, $errline, $errstr),
     };
 
     die($out);  
